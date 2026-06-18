@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-base_portal}
+      POSTGRES_USER: ${POSTGRES_USER:-base_portal}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    volumes:
+      - ${POSTGRES_DATA_DIR:?POSTGRES_DATA_DIR is required}:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-base_portal} -d $${POSTGRES_DB:-base_portal}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: ${CONTAINER_WEB_PORT:-3000}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
+      PORTAL_ENABLE_MOCK_AUTH: ${PORTAL_ENABLE_MOCK_AUTH:-false}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      PORTAL_MOCK_USER_ID: ${PORTAL_MOCK_USER_ID:-}
+      PORTAL_MOCK_USER_NAME: ${PORTAL_MOCK_USER_NAME:-}
+      PORTAL_ADMIN_USER_IDS: ${PORTAL_ADMIN_USER_IDS:-}
+      FEISHU_IAM_URL: ${FEISHU_IAM_URL:-https://feishu-iam.riversoft.com.cn}
+      FEISHU_IAM_APP_KEY: ${FEISHU_IAM_APP_KEY:-base-portal}
+      FEISHU_IAM_CLIENT_ID: ${FEISHU_IAM_CLIENT_ID:-}
+      FEISHU_IAM_CLIENT_SECRET: ${FEISHU_IAM_CLIENT_SECRET:-}
+      FEISHU_IAM_DEVELOPER_API_TOKEN: ${FEISHU_IAM_DEVELOPER_API_TOKEN:-}
+      APP_VERSION: ${APP_VERSION:-0.1.0}
+      GIT_COMMIT: ${GIT_COMMIT:-local}
+    ports:
+      - "${HOST_WEB_PORT:-3000}:${CONTAINER_WEB_PORT:-3000}"

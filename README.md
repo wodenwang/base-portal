@@ -2,10 +2,40 @@
 
 Base Portal 是独立第三方企业门户应用，通过 Feishu IAM 完成登录、用户信息读取和权限点读取。
 
-当前仓库处于设计和治理初始化阶段，已包含：
+当前仓库已包含首个可运行 vertical slice：
 
 - [AGENTS.md](AGENTS.md)：Feishu IAM 接入约定、安全边界和验收 checklist。
 - [Base Portal 设计规格](docs/superpowers/specs/2026-06-19-base-portal-design.md)：首版产品边界、架构、数据模型、前端交互、后端 API、运维和验收要求。
+- [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md)：首版实现计划和验证标准。
+- `apps/api`：NestJS + Prisma 后端，提供 IAM OAuth 接入、session、导航、审计和运维同步接口。
+- `apps/portal-web`：React + Vite 前端，提供功能域、树形菜单、Tab 工作区、iframe/immersive iframe/new tab 和应用内最大化。
+- `deploy/docker-compose.yml`：本地 Docker Compose 运行环境，包含 PostgreSQL 和 Web/API 服务。
+
+## 本地运行
+
+复制本地环境示例后启动：
+
+```bash
+cp deploy/.env.example deploy/.env
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --build
+```
+
+访问 [http://localhost:3000](http://localhost:3000)。
+
+本地默认启用 mock 登录，可点击登录页的“本地 mock 登录”，也可以直接访问：
+
+```bash
+open http://localhost:3000/api/auth/mock-login
+```
+
+常用验证命令：
+
+```bash
+pnpm check
+pnpm build
+curl -fsS http://localhost:3000/health
+curl -fsS http://localhost:3000/ready
+```
 
 ## 安全边界
 

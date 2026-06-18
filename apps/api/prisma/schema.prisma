@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PortalDomain {
+  id          String       @id
+  key         String       @unique
+  name        String
+  description String
+  icon        String
+  coverColor  String       @map("cover_color")
+  sortOrder   Int          @default(0) @map("sort_order")
+  status      String       @default("active")
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  menus       PortalMenu[]
+
+  @@map("portal_domains")
+}
+
+model PortalMenu {
+  id             String       @id
+  domainId       String       @map("domain_id")
+  parentId       String?      @map("parent_id")
+  key            String       @unique
+  title          String
+  icon           String
+  level          Int
+  sortOrder      Int          @default(0) @map("sort_order")
+  status         String       @default("active")
+  isLeaf         Boolean      @default(false) @map("is_leaf")
+  resourceKey    String?      @map("resource_key")
+  url            String?
+  openMode       String?      @map("open_mode")
+  confirmOnClose Boolean      @default(false) @map("confirm_on_close")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  domain         PortalDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+
+  @@index([domainId])
+  @@index([parentId])
+  @@index([resourceKey])
+  @@map("portal_menus")
+}
+
+model PortalAuditEvent {
+  id          String   @id
+  eventType   String   @map("event_type")
+  userId      String?  @map("user_id")
+  userName    String?  @map("user_name")
+  domainKey   String?  @map("domain_key")
+  domainName  String?  @map("domain_name")
+  menuId      String?  @map("menu_id")
+  menuTitle   String?  @map("menu_title")
+  openMode    String?  @map("open_mode")
+  detail      Json?
+  occurredAt  DateTime @default(now()) @map("occurred_at") @db.Timestamptz(6)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([eventType])
+  @@index([userId])
+  @@index([occurredAt])
+  @@map("portal_audit_events")
+}
