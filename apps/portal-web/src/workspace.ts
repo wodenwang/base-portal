@@ -37,7 +37,7 @@ export function openMenuTab(
   domain: NavigationDomain,
   menu: NavigationMenu
 ): { state: WorkspaceState; opened: boolean; reason?: 'limit' | 'invalid' } {
-  if (!menu.isLeaf || !menu.url || menu.openMode === 'new_tab' || !menu.openMode) {
+  if (!menu.isLeaf || !menu.url) {
     return { state, opened: false, reason: 'invalid' };
   }
   const existing = state.tabs.find((tab) => tab.menuId === menu.id);
@@ -54,7 +54,7 @@ export function openMenuTab(
     domainName: domain.name,
     title: menu.title,
     url: menu.url,
-    openMode: menu.openMode,
+    openMode: 'iframe',
     confirmOnClose: menu.confirmOnClose
   };
   return {
@@ -101,4 +101,12 @@ export function closeOtherTabs(state: WorkspaceState, tabId: string): WorkspaceS
 
 export function hasConfirmTabs(tabs: WorkspaceTab[]): boolean {
   return tabs.some((tab) => tab.confirmOnClose);
+}
+
+export function exitImmersiveTab(state: WorkspaceState, tabId: string): WorkspaceState {
+  return {
+    ...state,
+    tabs: state.tabs.map((tab) => (tab.id === tabId ? { ...tab, openMode: 'iframe' } : tab)),
+    maximized: false
+  };
 }

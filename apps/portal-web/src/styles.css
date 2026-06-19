@@ -1,15 +1,17 @@
 :root {
-  --bg: #eef2f7;
+  --bg: #f5f7fb;
   --panel: #ffffff;
-  --panel-soft: #f7f9fc;
-  --text: #172033;
-  --muted: #667085;
-  --border: #d9e0ea;
-  --accent: #0f766e;
-  --accent-strong: #115e59;
-  --sidebar: #111827;
-  --sidebar-soft: #1f2937;
-  --shadow: 0 18px 45px rgba(17, 24, 39, 0.12);
+  --panel-soft: #f8fafc;
+  --text: #111827;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --accent: #0f8f8a;
+  --accent-strong: #087872;
+  --accent-soft: #dff5f3;
+  --sidebar: #ffffff;
+  --sidebar-soft: #eefdfa;
+  --shadow: 0 16px 42px rgba(15, 23, 42, 0.10);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--text);
   background: var(--bg);
@@ -33,19 +35,26 @@ button {
   cursor: pointer;
 }
 
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 70%, #fff);
+  outline-offset: 2px;
+}
+
 .app-shell {
   height: 100vh;
   display: grid;
-  grid-template-rows: 58px 1fr;
+  grid-template-rows: 62px 1fr;
   overflow: hidden;
+  background: var(--bg);
 }
 
 .topbar {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
   padding: 0 18px;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.98);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(16px);
   z-index: 5;
@@ -55,49 +64,90 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 180px;
+  min-width: 206px;
   font-weight: 760;
+  white-space: nowrap;
+  color: #111827;
 }
 
 .brand-mark {
   display: inline-grid;
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   place-items: center;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #0f766e, #1d4ed8);
+  border-radius: 9px;
+  background: linear-gradient(135deg, #08968f, #0f766e);
   color: #fff;
   font-weight: 800;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.22);
 }
 
 .domain-nav {
-  flex: 1;
+  position: relative;
   display: flex;
-  gap: 6px;
-  overflow: hidden;
+  align-items: center;
+  min-width: 150px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border);
 }
 
 .domain-nav button,
 .tab-actions button,
-.embed-toolbar button,
 .fallback-panel button,
 .text-button,
-.icon-button {
+.icon-button,
+.user-menu-trigger,
+.dropdown-menu button {
   border: 1px solid transparent;
   background: transparent;
   color: var(--text);
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
-.domain-nav button {
+.domain-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  max-width: 180px;
+  padding: 0 11px;
+  border-color: var(--border-strong) !important;
+  background: #fff !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.domain-trigger span,
+.domain-dropdown span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.domain-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 16px;
+}
+
+.domain-dropdown button.active {
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+}
+
+.domain-inline-list {
+  display: none;
+}
+
+.domain-inline-list button {
+  flex: 0 0 auto;
   padding: 8px 12px;
   color: var(--muted);
   white-space: nowrap;
 }
 
-.domain-nav button.active {
+.domain-inline-list button.active {
   color: var(--accent-strong);
-  background: #e7f7f4;
+  background: var(--accent-soft);
 }
 
 .more-domain {
@@ -109,44 +159,137 @@ button {
 .user-area {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
+  margin-left: auto;
   color: var(--muted);
+  min-width: 0;
   white-space: nowrap;
 }
 
-.text-button {
-  padding: 6px 8px;
+.topbar-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 12px;
+  border-right: 1px solid var(--border);
+}
+
+.topbar-tools .icon-button {
+  color: #111827;
+}
+
+.user-menu {
+  position: relative;
+  min-width: 0;
+}
+
+.user-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 210px;
+  min-height: 38px;
+  padding: 4px 9px;
+  color: var(--muted);
+  background: #f8fafc;
+  white-space: nowrap;
+}
+
+.avatar {
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #eef2f7;
   color: var(--accent-strong);
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropdown-menu {
+  position: fixed;
+  z-index: 30;
+  display: grid;
+  min-width: 176px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 230px;
+  padding: 8px;
+}
+
+.dropdown-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 7px 9px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.dropdown-menu button:hover {
+  background: var(--panel-soft);
 }
 
 .body {
   display: grid;
-  grid-template-columns: 260px 1fr;
+  grid-template-columns: 220px 1fr;
   min-height: 0;
 }
 
 .sidebar {
   min-width: 0;
   background: var(--sidebar);
-  color: #f8fafc;
+  color: var(--text);
+  border-right: 1px solid var(--border);
   overflow: auto;
   transition: width 0.2s ease;
 }
 
 .sidebar-collapsed .body {
-  grid-template-columns: 76px 1fr;
+  grid-template-columns: 64px 1fr;
 }
 
 .sidebar-header {
-  min-height: 54px;
+  min-height: 50px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 0 14px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  color: #dbeafe;
+  padding: 0 12px 0 18px;
+  border-bottom: 1px solid var(--border);
+  color: var(--accent-strong);
   font-weight: 650;
+  white-space: nowrap;
+}
+
+.sidebar-header span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .icon-button {
@@ -158,11 +301,42 @@ button {
 }
 
 .sidebar .icon-button {
-  color: #e5e7eb;
+  color: var(--muted);
+}
+
+.workbench-link {
+  width: calc(100% - 20px);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  margin: 10px 10px 4px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.workbench-link span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workbench-link:hover {
+  background: var(--panel-soft);
+}
+
+.workbench-link.active {
+  color: var(--accent-strong);
+  background: var(--sidebar-soft);
 }
 
 .menu-tree {
-  padding: 10px;
+  padding: 4px 8px 14px;
 }
 
 .menu-node button {
@@ -173,14 +347,21 @@ button {
   min-height: 38px;
   padding: 8px 10px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 6px;
   background: transparent;
-  color: #e5e7eb;
+  color: #334155;
   text-align: left;
+  white-space: nowrap;
+}
+
+.menu-node button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .menu-group {
-  color: #9ca3af !important;
+  color: #334155 !important;
   font-weight: 650;
 }
 
@@ -188,12 +369,40 @@ button {
   background: var(--sidebar-soft);
 }
 
+.menu-leaf:focus,
+.menu-leaf:hover,
+.menu-leaf.active {
+  color: var(--accent-strong);
+}
+
+.menu-leaf.active {
+  position: relative;
+  background: var(--sidebar-soft);
+  font-weight: 650;
+}
+
+.menu-leaf.active::before {
+  position: absolute;
+  left: -8px;
+  top: 8px;
+  width: 3px;
+  height: calc(100% - 16px);
+  border-radius: 999px;
+  background: var(--accent);
+  content: "";
+}
+
+.menu-chevron {
+  margin-left: auto;
+  color: var(--muted);
+}
+
 .level-2 > button {
-  padding-left: 22px;
+  padding-left: 26px;
 }
 
 .level-3 > button {
-  padding-left: 34px;
+  padding-left: 42px;
 }
 
 .sidebar-collapsed .menu-node button {
@@ -203,16 +412,19 @@ button {
 
 .workspace {
   display: grid;
-  grid-template-rows: 44px 1fr;
+  grid-template-rows: 48px 1fr;
   min-width: 0;
   min-height: 0;
+  background: #f7f9fc;
 }
 
 .tab-strip {
+  position: relative;
   display: flex;
   align-items: center;
   min-width: 0;
-  background: #f8fafc;
+  padding: 0 12px;
+  background: #fff;
   border-bottom: 1px solid var(--border);
 }
 
@@ -229,23 +441,26 @@ button {
   gap: 8px;
   min-width: 128px;
   max-width: 220px;
-  height: 43px;
+  height: 36px;
+  margin-right: 4px;
   padding: 0 12px;
-  border: 0;
-  border-right: 1px solid var(--border);
+  border: 1px solid var(--border);
+  border-radius: 7px 7px 0 0;
   background: #f8fafc;
   color: var(--muted);
   white-space: nowrap;
 }
 
 .tab span:first-child {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .tab.active {
   background: #fff;
-  color: var(--text);
+  color: var(--accent-strong);
+  border-top-color: var(--accent);
   box-shadow: inset 0 2px 0 var(--accent);
 }
 
@@ -267,7 +482,7 @@ button {
 .tab-actions {
   display: flex;
   gap: 4px;
-  padding: 0 8px;
+  padding-left: 8px;
 }
 
 .tab-actions button {
@@ -276,10 +491,19 @@ button {
   white-space: nowrap;
 }
 
+.tab-actions .icon-button {
+  width: 34px;
+  padding: 0;
+}
+
+.tab-context-menu {
+  transform: translate(0, 4px);
+}
+
 .workspace-content {
   min-height: 0;
   overflow: hidden;
-  padding: 16px;
+  padding: 14px;
 }
 
 .domain-home {
@@ -289,10 +513,10 @@ button {
   gap: 24px;
   padding: clamp(24px, 5vw, 58px);
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--cover) 10%, #fff), #fff 58%),
+    linear-gradient(135deg, color-mix(in srgb, var(--cover) 8%, #fff), #fff 58%),
     var(--panel);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 8px;
   box-shadow: var(--shadow);
 }
 
@@ -301,7 +525,7 @@ button {
   width: 86px;
   height: 86px;
   place-items: center;
-  border-radius: 24px;
+  border-radius: 18px;
   background: var(--cover);
   color: white;
   box-shadow: 0 16px 38px color-mix(in srgb, var(--cover) 28%, transparent);
@@ -330,31 +554,14 @@ button {
 
 .embed-shell {
   position: relative;
-  display: grid;
-  grid-template-rows: 42px 1fr;
+  display: block;
   height: 100%;
-  background: var(--panel);
+  background: #fff;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
 }
 
-.embed-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 12px;
-  border-bottom: 1px solid var(--border);
-  background: #fff;
-  color: var(--muted);
-}
-
-.embed-toolbar div {
-  display: flex;
-  gap: 6px;
-}
-
-.embed-toolbar button,
 .fallback-panel button {
   display: inline-flex;
   align-items: center;
@@ -374,7 +581,7 @@ button {
 .fallback-panel {
   position: absolute;
   right: 16px;
-  top: 58px;
+  top: 16px;
   z-index: 2;
   display: grid;
   gap: 8px;
@@ -395,6 +602,24 @@ button {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.maximize-exit {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  white-space: nowrap;
 }
 
 .immersive .body,
@@ -503,6 +728,12 @@ button {
     min-width: auto;
   }
 
+  .brand span:last-child {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
   .domain-nav {
     display: none;
   }
@@ -513,6 +744,7 @@ button {
     z-index: 10;
     width: min(300px, 82vw);
     transform: translateX(-105%);
+    box-shadow: var(--shadow);
   }
 
   .sidebar.mobile-open {
@@ -523,8 +755,8 @@ button {
     padding: 10px;
   }
 
-  .tab-actions button {
-    font-size: 12px;
+  .tab-actions .icon-button {
+    width: 32px;
   }
 }
 
@@ -534,8 +766,17 @@ button {
     padding: 0 10px;
   }
 
-  .user-area span {
+  .user-name {
     display: none;
+  }
+
+  .topbar-tools {
+    display: none;
+  }
+
+  .user-menu-trigger {
+    max-width: 72px;
+    padding: 4px 6px;
   }
 
   .tab {

@@ -15,6 +15,7 @@ services:
       retries: 20
 
   web:
+    image: ${BASE_PORTAL_IMAGE:?BASE_PORTAL_IMAGE is required}
     build:
       context: ..
       dockerfile: deploy/web.Dockerfile
@@ -36,6 +37,7 @@ services:
       FEISHU_IAM_CLIENT_ID: ${FEISHU_IAM_CLIENT_ID:-}
       FEISHU_IAM_CLIENT_SECRET: ${FEISHU_IAM_CLIENT_SECRET:-}
       FEISHU_IAM_DEVELOPER_API_TOKEN: ${FEISHU_IAM_DEVELOPER_API_TOKEN:-}
+      BASE_PORTAL_VERSION: ${BASE_PORTAL_VERSION:-v0.1.0}
       APP_VERSION: ${APP_VERSION:-0.1.0}
       GIT_COMMIT: ${GIT_COMMIT:-local}
     ports:
