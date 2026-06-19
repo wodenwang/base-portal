@@ -4,13 +4,13 @@
 
 版本：`v0.3.0`
 
-状态：`V0.3.0_STEP_12_PRE_LANDING_REVIEW_COMPLETE`
+状态：`V0.3.0_COMPLETE`
 
 ## v0.3.0 当前判断
 
 推荐方向：第三方无感接入体验版。
 
-当前下一步：Step 13 Git closeout / Step 14 ship，整理 diff、提交、push、tag 和 GitHub Release。
+当前下一步：无。v0.3.0 已完成 release + deploy；后续可进入 v0.3.1 或将 SSO Demo 外部配合需求复制到 `feishu-iam-sso-demo` 项目继续推进。
 
 关键证据：
 
@@ -29,6 +29,7 @@
 - Step 10 Visual QA：`docs/qa/2026-06-20-v0.3.0-visual-qa.md`
 - Step 11 Functional QA：`docs/qa/2026-06-20-v0.3.0-functional-qa.md`
 - Step 12 Pre-landing review：`docs/reviews/2026-06-20-v0.3.0-pre-landing-review.md`
+- Step 15 Production deploy：`docs/verification/2026-06-20-v0.3.0-production-deploy.md`
 - SSO Demo 配合需求：`docs/external-requirements/2026-06-20-feishu-iam-sso-demo-embedded-sso.md`
 
 ## v0.3.0 15-Step Ledger
@@ -47,9 +48,9 @@
 | 10 | Visual QA | complete | `docs/qa/2026-06-20-v0.3.0-visual-qa.md` |
 | 11 | Functional QA | complete | `docs/qa/2026-06-20-v0.3.0-functional-qa.md` |
 | 12 | Review | complete | `docs/reviews/2026-06-20-v0.3.0-pre-landing-review.md`，未发现阻塞 ship / deploy 的问题 |
-| 13 | Git closeout | current | 待整理 diff、提交并 push |
-| 14 | Ship | pending | 待创建 tag / GitHub Release |
-| 15 | Land and deploy | pending | 待授权部署并验证生产 |
+| 13 | Git closeout | complete | `main` 已包含 v0.3.0 closeout commit，最终以 `v0.3.0` tag / `origin/main` / 生产 `/version.commit` 对齐为准 |
+| 14 | Ship | complete | GitHub Release `v0.3.0` |
+| 15 | Land and deploy | complete | `docs/verification/2026-06-20-v0.3.0-production-deploy.md`，生产 `/health`、`/ready`、`/version`、SSO Demo 接入包、IAM sync、权限过滤和公网 smoke 均通过 |
 
 ## v0.2.0 当前判断
 

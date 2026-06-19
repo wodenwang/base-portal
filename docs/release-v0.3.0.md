@@ -1,6 +1,6 @@
 # Base Portal v0.3.0 Release Notes
 
-发布日期：待发布
+发布日期：2026-06-20
 
 ## 范围
 

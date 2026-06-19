@@ -15,6 +15,7 @@
 - v0.3.0 functional QA：`docs/qa/2026-06-20-v0.3.0-functional-qa.md`
 - v0.3.0 pre-landing review：`docs/reviews/2026-06-20-v0.3.0-pre-landing-review.md`
 - v0.3.0 release notes：`docs/release-v0.3.0.md`
+- v0.3.0 production deploy verification：`docs/verification/2026-06-20-v0.3.0-production-deploy.md`
 - SSO Demo 配合需求：`docs/external-requirements/2026-06-20-feishu-iam-sso-demo-embedded-sso.md`
 - v0.3.0 run ledger：`.my-harness/runs/2026-06-20-v0.3.0.md`
 - v0.2.0 Discovery：`.my-harness/runs/2026-06-19-v0.2.0-discovery.md`
