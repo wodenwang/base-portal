@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Base Portal">
+  <rect width="64" height="64" rx="14" fill="#0f766e"/>
+  <path d="M18 18h28v8H26v10h16v8H18z" fill="#f8fafc"/>
+  <path d="M30 30h16v16h-8v-8h-8z" fill="#99f6e4"/>
+</svg>

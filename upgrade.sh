@@ -2,11 +2,11 @@
 set -euo pipefail
 
 FROM_VERSION=""
-TO_VERSION="v0.1.0"
+TO_VERSION="v0.1.1"
 HOST="bpmt@120.24.236.92"
 REMOTE_DIR="/home/bpmt/base-portal"
-LOCAL_PLACEHOLDER_IMAGE="base-portal:v0.1.0"
 IMAGE="${BASE_PORTAL_IMAGE:-}"
+PULL_POLICY="${BASE_PORTAL_PULL_POLICY:-missing}"
 
 usage() {
   cat <<'EOF'
@@ -14,10 +14,11 @@ Usage: ./upgrade.sh [options]
 
 Options:
   --from VERSION        Expected currently installed version.
-  --to VERSION          Target version. Default: v0.1.0
+  --to VERSION          Target version. Default: v0.1.1
   --host USER@HOST      SSH target. Default: bpmt@120.24.236.92
   --remote-dir PATH     Remote install dir. Default: /home/bpmt/base-portal
   --image IMAGE:TAG     Immutable target image tag. Required for production.
+  --pull POLICY         Image pull policy: missing, always, or never. Default: missing.
   -h, --help            Show this help.
 EOF
 }
@@ -29,6 +30,7 @@ while [[ $# -gt 0 ]]; do
     --host) HOST="${2:?missing value for --host}"; shift 2 ;;
     --remote-dir) REMOTE_DIR="${2:?missing value for --remote-dir}"; shift 2 ;;
     --image) IMAGE="${2:?missing value for --image}"; shift 2 ;;
+    --pull|--pull-policy) PULL_POLICY="${2:?missing value for --pull}"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage >&2; exit 2 ;;
   esac
@@ -48,11 +50,12 @@ shell_quote() {
 }
 
 reject_latest_image() {
+  local placeholder_image="base-portal:${TO_VERSION}"
   if [[ -z "$IMAGE" ]]; then
     echo "Production image is required. Pass --image <registry>/base-portal:$TO_VERSION or set BASE_PORTAL_IMAGE." >&2
     exit 1
   fi
-  if [[ "$IMAGE" == "$LOCAL_PLACEHOLDER_IMAGE" ]]; then
+  if [[ "$IMAGE" == "$placeholder_image" ]]; then
     echo "Refusing local placeholder image for production deploy: $IMAGE" >&2
     echo "Pass an immutable registry image, for example <registry>/base-portal:$TO_VERSION." >&2
     exit 1
@@ -61,6 +64,16 @@ reject_latest_image() {
     echo "Production image must use an explicit immutable version tag, not latest: $IMAGE" >&2
     exit 1
   fi
+}
+
+validate_pull_policy() {
+  case "$PULL_POLICY" in
+    missing|always|never) ;;
+    *)
+      echo "Invalid pull policy: $PULL_POLICY. Use missing, always, or never." >&2
+      exit 2
+      ;;
+  esac
 }
 
 sync_release_files() {
@@ -76,13 +89,14 @@ sync_release_files() {
 }
 
 remote_upgrade() {
-  local from_version_q to_version_q app_version_q image_q remote_dir_q
+  local from_version_q to_version_q app_version_q image_q remote_dir_q pull_policy_q
   from_version_q="$(shell_quote "$FROM_VERSION")"
   to_version_q="$(shell_quote "$TO_VERSION")"
   app_version_q="$(shell_quote "$APP_VERSION")"
   image_q="$(shell_quote "$IMAGE")"
   remote_dir_q="$(shell_quote "$REMOTE_DIR")"
-  ssh "$HOST" "EXPECTED_FROM=${from_version_q} TARGET_VERSION=${to_version_q} APP_VERSION=${app_version_q} BASE_PORTAL_IMAGE=${image_q} REMOTE_DIR=${remote_dir_q} bash -s" <<'REMOTE'
+  pull_policy_q="$(shell_quote "$PULL_POLICY")"
+  ssh "$HOST" "EXPECTED_FROM=${from_version_q} TARGET_VERSION=${to_version_q} APP_VERSION=${app_version_q} BASE_PORTAL_IMAGE=${image_q} BASE_PORTAL_PULL_POLICY=${pull_policy_q} REMOTE_DIR=${remote_dir_q} bash -s" <<'REMOTE'
 set -euo pipefail
 cd "$REMOTE_DIR"
 
@@ -177,14 +191,32 @@ fi
 export BASE_PORTAL_VERSION="$TARGET_VERSION"
 export APP_VERSION="$APP_VERSION"
 export BASE_PORTAL_IMAGE="$BASE_PORTAL_IMAGE"
+export BASE_PORTAL_PULL_POLICY="${BASE_PORTAL_PULL_POLICY:-missing}"
 export GIT_COMMIT="${GIT_COMMIT:-unknown}"
 
 docker compose --env-file deploy/.env -f deploy/docker-compose.yml config >/dev/null
-docker compose --env-file deploy/.env -f deploy/docker-compose.yml pull db
-if ! docker image inspect "$BASE_PORTAL_IMAGE" >/dev/null 2>&1; then
-  docker compose --env-file deploy/.env -f deploy/docker-compose.yml pull web
-fi
-docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --no-build
+case "$BASE_PORTAL_PULL_POLICY" in
+  always)
+    docker compose --env-file deploy/.env -f deploy/docker-compose.yml pull db
+    docker compose --env-file deploy/.env -f deploy/docker-compose.yml pull web
+    ;;
+  missing)
+    if ! docker image inspect postgres:16-alpine >/dev/null 2>&1; then
+      docker compose --env-file deploy/.env -f deploy/docker-compose.yml pull db
+    fi
+    if ! docker image inspect "$BASE_PORTAL_IMAGE" >/dev/null 2>&1; then
+      docker compose --env-file deploy/.env -f deploy/docker-compose.yml pull web
+    fi
+    ;;
+  never)
+    echo "Image pull skipped because BASE_PORTAL_PULL_POLICY=never."
+    ;;
+  *)
+    echo "Invalid BASE_PORTAL_PULL_POLICY: $BASE_PORTAL_PULL_POLICY" >&2
+    exit 2
+    ;;
+esac
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --no-build --pull never
 
 HOST_WEB_PORT="$(grep -E '^HOST_WEB_PORT=' deploy/.env | tail -1 | cut -d= -f2-)"
 HOST_WEB_PORT="${HOST_WEB_PORT:-3000}"
@@ -207,6 +239,7 @@ main() {
   require_cmd ssh
   require_cmd tar
   reject_latest_image
+  validate_pull_policy
   sync_release_files
   remote_upgrade
 }

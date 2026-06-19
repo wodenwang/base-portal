@@ -1,9 +1,9 @@
 # Base Portal 部署与升级规范
 
-状态：DEPLOYMENT_BASELINE  
-适用版本：v0.1.0  
-生产域名：`https://base-portal.riversoft.com.cn`  
-生产服务器：`bpmt@120.24.236.92:/home/bpmt/base-portal`  
+状态：DEPLOYMENT_BASELINE
+适用版本：v0.1.1
+生产域名：`https://base-portal.riversoft.com.cn`
+生产服务器：`bpmt@120.24.236.92:/home/bpmt/base-portal`
 服务器 nginx 目录：`bpmt@120.24.236.92:~/nginx`
 
 本文件是 `base-portal` 的项目级部署和升级治理事实源。所有涉及生产镜像、Docker Compose、安装脚本、升级脚本、数据库迁移、运行参数、DNS、证书、反向代理、发布版本和部署目录的改动，必须先遵守本文件。
@@ -11,9 +11,9 @@
 ## 1. 核心原则
 
 - 项目开发过程中和最终部署过程中，必须严格执行本文件。
-- v0.1.0 的交付范围包括前端重构、GitHub issues #1-#5、生产 Docker Compose、`install.sh`、`upgrade.sh`、DNS、证书、nginx 反向代理和健康检查。
+- v0.1.1 的交付范围是在 v0.1.0 基础上硬化生产升级链路：可控镜像 pull 策略、可配置 Dockerfile 基础镜像、favicon 和上线证据收口。
 - 正式部署以版本为最小管理颗粒度。
-- 生产发布物是版本化 Docker image，tag 必须与 release 版本一致，例如 `v0.1.0`。
+- 生产发布物是版本化 Docker image，tag 必须与 release 版本一致，例如 `v0.1.1`。
 - 生产运行形态是 Docker Compose。
 - `install.sh` 只负责首次初始化安装。
 - `upgrade.sh` 只负责已安装版本到目标版本的升级。
@@ -52,17 +52,17 @@ Alibaba Cloud DNS A record
 需要区分以下概念：
 
 - 当前安装版本：从 `.deploy/version` 读取。
-- 目标版本：本次安装或升级要达到的 release 版本，例如 `v0.1.0`。
+- 目标版本：本次安装或升级要达到的 release 版本，例如 `v0.1.1`。
 - 镜像版本：与 release 版本一致的 Docker image tag。
 - Compose 版本：目标 release 携带的 `deploy/docker-compose.yml` 和 `deploy/.env.example`。
 - DB 版本：Prisma migration 成功应用后的数据库版本。
 - 配置版本：目标 release 需要的运行参数集合。
 
-v0.1.0 的镜像地址在实现阶段必须落为显式变量，例如：
+当前版本的镜像地址必须落为显式变量，例如：
 
 ```text
-BASE_PORTAL_IMAGE=<registry>/base-portal:v0.1.0
-BASE_PORTAL_VERSION=v0.1.0
+BASE_PORTAL_IMAGE=<registry>/base-portal:v0.1.1
+BASE_PORTAL_VERSION=v0.1.1
 ```
 
 生产 Compose 必须使用 `image: ${BASE_PORTAL_IMAGE:?BASE_PORTAL_IMAGE is required}` 或等价固定版本镜像，不得只依赖 `build:`。
@@ -88,7 +88,7 @@ BASE_PORTAL_VERSION=v0.1.0
   data/
     postgres/
   releases/
-    v0.1.0/
+    v0.1.1/
   backups/
 ```
 
@@ -100,7 +100,7 @@ BASE_PORTAL_VERSION=v0.1.0
 
 `install.sh` 必须：
 
-1. 默认目标版本为当前仓库版本 `v0.1.0`，也允许显式传入 `--version v0.1.0`。
+1. 默认目标版本为当前仓库版本 `v0.1.1`，也允许显式传入 `--version v0.1.1`。
 2. 检查 `.deploy/version` 是否已经存在；默认拒绝重复初始化。
 3. 检查 `docker`、`docker compose`、`ssh`、`tar` 或等价部署依赖。
 4. 校验生产镜像 tag 是明确版本，不是 `latest`。
@@ -140,7 +140,7 @@ BASE_PORTAL_VERSION=v0.1.0
 deploy/docker-compose.yml
 ```
 
-v0.1.0 实现阶段必须完成：
+当前实现必须满足：
 
 - 保留本地 build 能力，便于开发验证。
 - 为生产部署提供固定镜像 tag 的路径。
@@ -149,6 +149,7 @@ v0.1.0 实现阶段必须完成：
 - `PORTAL_ENABLE_MOCK_AUTH` 生产默认必须为 `false`。
 - `COOKIE_SECURE` 生产默认必须为 `true`。
 - 生产 `.env.example` 不得包含真实 secret。
+- 服务器 Docker Hub 访问不稳定时，允许通过 `BASE_PORTAL_PULL_POLICY=never` 或 `--pull never` 使用远端已存在的固定版本镜像；脚本仍必须验证镜像 tag、env readiness、health 和 `.deploy/version`。
 
 ## 8. DNS 规则
 
@@ -210,7 +211,7 @@ nginx 配置必须支持：
 
 ## 10. 发布与验证门禁
 
-v0.1.0 进入 ship / deploy 前至少需要：
+当前版本进入 ship / deploy 前至少需要：
 
 ```bash
 pnpm --filter @base-portal/portal-web test
@@ -239,7 +240,7 @@ curl -fsS https://base-portal.riversoft.com.cn/ready
 
 ## 11. 完成声明要求
 
-声称 v0.1.0 完成时必须同时说明：
+声称当前版本完成时必须同时说明：
 
 - Git commit。
 - release/tag。
@@ -253,4 +254,4 @@ curl -fsS https://base-portal.riversoft.com.cn/ready
 - `/health`、`/ready`、首页和登录入口的生产 URL 验证结果。
 - 前端 issues #1-#5 的验证证据。
 
-缺少任一项，只能说“本地实现完成”或“部署部分完成”，不得说 v0.1.0 已完整交付。
+缺少任一项，只能说“本地实现完成”或“部署部分完成”，不得说当前版本已完整交付。

@@ -2,47 +2,39 @@
 
 项目：`base-portal`
 
-版本：`v0.1.0`
+版本：`v0.1.1`
 
-状态：`STEP_15_DEPLOYMENT_ENV_GATE`
+状态：`STEP_13_GIT_CLOSEOUT_PENDING`
 
-已完成：
+## v0.1.1 范围
 
-- Step 1-4：需求、设计方向、原型与设计收口已完成，当前基线为方案 2。
-- Step 5-6：工程评审、`DEPLOY.md`、`IMPLEMENTATION_PLAN.md` 已完成。
-- Step 7-10：前端重构、GitHub issues #1-#5、design QA 已完成并修复。
-- Step 11：系统化功能 QA 已完成并修复。
-- Step 12：落地前 review 与人工反馈后的 refresh 已完成并修复。
-- Step 13：ship preflight 已完成。
-- Step 14：本地提交已创建并推送分支。
+- 固化部署脚本 pull 策略：`missing`、`always`、`never`。
+- 允许远端使用已存在镜像完成升级，避免 Docker Hub 超时阻塞。
+- 支持 Dockerfile 基础镜像参数 `NODE_IMAGE`。
+- 补前端 favicon，消除 v0.1.0 生产页面唯一 console error。
+- 同步 v0.1.0 已上线证据和 v0.1.1 发布证据。
 
-下一步：
+## 15-Step Ledger
 
-- Step 14：最终 main 快进、tag、GitHub release。
-- Step 15：补齐远端生产 env 后，重跑 `./install.sh --image base-portal-release:v0.1.0` 并验证 `https://base-portal.riversoft.com.cn/health` 和 `/ready`。
+| Step | Gate | Status | Evidence |
+|---:|---|---|---|
+| 1 | Discovery / Brainstorm | complete | 用户确认默认项：选择 `v0.1.1` 生产硬化范围并推进到版本完结 |
+| 2 | Product/design planning review | skipped | 不改变 UI 流程，favicon only |
+| 3 | Design artifact / visual target | skipped | 继续使用 `DESIGN.md` 和既有 v0.1.0 视觉基线 |
+| 4 | Design review | skipped | 无布局或交互视觉变更 |
+| 5 | Eng review | complete | `IMPLEMENTATION_PLAN.md` 的 Scope Decisions |
+| 6 | Writing plan | complete | `IMPLEMENTATION_PLAN.md` |
+| 7 | Executing plan | complete | 部署脚本、Dockerfile、版本和 favicon 改动 |
+| 8 | Verification before completion | complete | `pnpm check`、`pnpm build`、`bash -n`、Compose config、`git diff --check` 均通过 |
+| 9 | Browser verification | in_progress | build 产物已验证 favicon；待生产 browser smoke |
+| 10 | Visual QA | skipped | 无视觉布局变更 |
+| 11 | Functional QA | pending | 待验证 production health/ready/version |
+| 12 | Review | pending | 待做 diff review |
+| 13 | Git closeout | pending | 待 staged diff 和 release notes |
+| 14 | Ship | pending | 待 commit、tag、GitHub release |
+| 15 | Land and deploy | pending | 待生产升级和线上健康验证 |
 
-当前部署节点读回：
-
-- DNS：`base-portal.riversoft.com.cn A 120.24.236.92`。
-- 远端镜像：`base-portal-release:v0.1.0` 已加载。
-- 远端 `.deploy/version`：missing。
-- 线上 `/health`、`/ready`：502。
-- env gate：`POSTGRES_PASSWORD`、`DATABASE_URL` 仍是占位；`FEISHU_IAM_CLIENT_SECRET`、`FEISHU_IAM_DEVELOPER_API_TOKEN` 为空。
-
-2026-06-19 18:16 CST Step 15 重试：
-
-- `./install.sh --image base-portal-release:v0.1.0` 已执行。
-- 脚本退出码：`2`。
-- 结论：仍停在 env gate，未启动 Docker Compose，未写入 `.deploy/version`。
-
-2026-06-19 18:28 CST Step 15 再次重试：
-
-- `./install.sh --image base-portal-release:v0.1.0` 已执行。
-- 脚本退出码：`2`。
-- env 文件元数据：`/home/bpmt/base-portal/deploy/.env`，权限 `600`，大小 `695 bytes`，mtime `2026-06-19 12:54:38 +0800`。
-- 结论：仍停在 env gate，未启动 Docker Compose，未写入 `.deploy/version`。
-
-Secret 边界：
+## Secret 边界
 
 - 不读取、不回显真实 `deploy/.env`。
 - 不提交 `deploy/.env`。

@@ -1,6 +1,6 @@
 {
   "name": "base-portal",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Enterprise portal application integrated with Feishu IAM",
   "packageManager": "pnpm@9.15.4",

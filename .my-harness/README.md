@@ -1,11 +1,11 @@
 # Base Portal my-harness Index
 
-当前迭代：`v0.1.0`
+当前迭代：`v0.1.1`
 
 主入口：
 
 - 当前状态：`.my-harness/status.md`
-- 本轮运行记录：`.my-harness/runs/2026-06-19-v0.1.0.md`
+- 本轮运行记录：`.my-harness/runs/2026-06-19-v0.1.1.md`
 - 实施计划：`IMPLEMENTATION_PLAN.md`
 - 部署规范：`DEPLOY.md`
 - 设计 QA：`design-qa.md`

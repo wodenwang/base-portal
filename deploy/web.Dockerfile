@@ -1,4 +1,6 @@
-FROM node:22-alpine AS build
+ARG NODE_IMAGE=node:22-alpine
+
+FROM ${NODE_IMAGE} AS build
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml tsconfig.base.json eslint.config.mjs ./
@@ -9,7 +11,7 @@ COPY apps ./apps
 RUN pnpm --filter @base-portal/api prisma:generate
 RUN pnpm build
 
-FROM node:22-alpine
+FROM ${NODE_IMAGE}
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml ./
