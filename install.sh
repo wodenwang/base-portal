@@ -133,13 +133,14 @@ sync_release_files() {
 }
 
 remote_install() {
-  local version_q app_version_q image_q remote_dir_q pull_policy_q
+  local version_q app_version_q image_q remote_dir_q pull_policy_q git_commit_q
   version_q="$(shell_quote "$VERSION")"
   app_version_q="$(shell_quote "$APP_VERSION")"
   image_q="$(shell_quote "$IMAGE")"
   remote_dir_q="$(shell_quote "$REMOTE_DIR")"
   pull_policy_q="$(shell_quote "$PULL_POLICY")"
-  ssh "$HOST" "TARGET_VERSION=${version_q} APP_VERSION=${app_version_q} BASE_PORTAL_IMAGE=${image_q} BASE_PORTAL_PULL_POLICY=${pull_policy_q} REMOTE_DIR=${remote_dir_q} bash -s" <<'REMOTE'
+  git_commit_q="$(shell_quote "${GIT_COMMIT:-$(git rev-parse HEAD 2>/dev/null || echo unknown)}")"
+  ssh "$HOST" "TARGET_VERSION=${version_q} APP_VERSION=${app_version_q} BASE_PORTAL_IMAGE=${image_q} BASE_PORTAL_PULL_POLICY=${pull_policy_q} GIT_COMMIT=${git_commit_q} REMOTE_DIR=${remote_dir_q} bash -s" <<'REMOTE'
 set -euo pipefail
 cd "$REMOTE_DIR"
 

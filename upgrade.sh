@@ -7,6 +7,7 @@ HOST="bpmt@120.24.236.92"
 REMOTE_DIR="/home/bpmt/base-portal"
 IMAGE="${BASE_PORTAL_IMAGE:-}"
 PULL_POLICY="${BASE_PORTAL_PULL_POLICY:-missing}"
+FORCE=0
 
 usage() {
   cat <<'EOF'
@@ -19,6 +20,7 @@ Options:
   --remote-dir PATH     Remote install dir. Default: /home/bpmt/base-portal
   --image IMAGE:TAG     Immutable target image tag. Required for production.
   --pull POLICY         Image pull policy: missing, always, or never. Default: missing.
+  --force               Allow redeploying the same target version.
   -h, --help            Show this help.
 EOF
 }
@@ -31,6 +33,7 @@ while [[ $# -gt 0 ]]; do
     --remote-dir) REMOTE_DIR="${2:?missing value for --remote-dir}"; shift 2 ;;
     --image) IMAGE="${2:?missing value for --image}"; shift 2 ;;
     --pull|--pull-policy) PULL_POLICY="${2:?missing value for --pull}"; shift 2 ;;
+    --force) FORCE=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage >&2; exit 2 ;;
   esac
@@ -89,14 +92,16 @@ sync_release_files() {
 }
 
 remote_upgrade() {
-  local from_version_q to_version_q app_version_q image_q remote_dir_q pull_policy_q
+  local from_version_q to_version_q app_version_q image_q remote_dir_q pull_policy_q force_q git_commit_q
   from_version_q="$(shell_quote "$FROM_VERSION")"
   to_version_q="$(shell_quote "$TO_VERSION")"
   app_version_q="$(shell_quote "$APP_VERSION")"
   image_q="$(shell_quote "$IMAGE")"
   remote_dir_q="$(shell_quote "$REMOTE_DIR")"
   pull_policy_q="$(shell_quote "$PULL_POLICY")"
-  ssh "$HOST" "EXPECTED_FROM=${from_version_q} TARGET_VERSION=${to_version_q} APP_VERSION=${app_version_q} BASE_PORTAL_IMAGE=${image_q} BASE_PORTAL_PULL_POLICY=${pull_policy_q} REMOTE_DIR=${remote_dir_q} bash -s" <<'REMOTE'
+  force_q="$(shell_quote "$FORCE")"
+  git_commit_q="$(shell_quote "${GIT_COMMIT:-$(git rev-parse HEAD 2>/dev/null || echo unknown)}")"
+  ssh "$HOST" "EXPECTED_FROM=${from_version_q} TARGET_VERSION=${to_version_q} APP_VERSION=${app_version_q} BASE_PORTAL_IMAGE=${image_q} BASE_PORTAL_PULL_POLICY=${pull_policy_q} FORCE=${force_q} GIT_COMMIT=${git_commit_q} REMOTE_DIR=${remote_dir_q} bash -s" <<'REMOTE'
 set -euo pipefail
 cd "$REMOTE_DIR"
 
@@ -116,9 +121,12 @@ if [[ -n "$EXPECTED_FROM" && "$CURRENT_VERSION" != "$EXPECTED_FROM" ]]; then
   echo "Expected current version $EXPECTED_FROM but found $CURRENT_VERSION." >&2
   exit 1
 fi
-if [[ "$CURRENT_VERSION" == "$TARGET_VERSION" ]]; then
+if [[ "$CURRENT_VERSION" == "$TARGET_VERSION" && "${FORCE:-0}" != "1" ]]; then
   echo "Refusing same-version upgrade: $CURRENT_VERSION." >&2
   exit 1
+fi
+if [[ "$CURRENT_VERSION" == "$TARGET_VERSION" && "${FORCE:-0}" == "1" ]]; then
+  echo "Forcing same-version redeploy: $CURRENT_VERSION."
 fi
 if [[ "$TARGET_VERSION" < "$CURRENT_VERSION" ]]; then
   echo "Refusing downgrade from $CURRENT_VERSION to $TARGET_VERSION." >&2

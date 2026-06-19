@@ -85,6 +85,8 @@ Expected behavior:
 - `always` preserves the explicit pull behavior.
 - Scripts still reject `latest`, missing images, unsafe env, and placeholder secrets.
 - Existing production `.env` files are not blocked for missing optional `BASE_PORTAL_PULL_POLICY`; the script argument or process env supplies the value.
+- `install.sh` and `upgrade.sh` pass `GIT_COMMIT` into the remote Compose environment so `/version` can prove the deployed commit.
+- `upgrade.sh --force` allows an explicit same-version redeploy for a failed or incomplete release candidate while preserving the default refusal.
 
 ### Task 3: Build image base hardening
 
