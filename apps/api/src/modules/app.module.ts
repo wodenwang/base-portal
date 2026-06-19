@@ -7,11 +7,12 @@ import { HealthController } from './health.controller';
 import { NavigationController } from './navigation.controller';
 import { NavigationService } from './navigation.service';
 import { OpsController } from './ops.controller';
+import { OpsService } from './ops.service';
 import { PrismaService } from './prisma.service';
 import { SessionService } from './session.service';
 
 @Module({
   controllers: [AuditController, AuthController, HealthController, NavigationController, OpsController],
-  providers: [AuditService, AuthService, NavigationService, PrismaService, SessionService]
+  providers: [AuditService, AuthService, NavigationService, OpsService, PrismaService, SessionService]
 })
 export class AppModule {}

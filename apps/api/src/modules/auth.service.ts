@@ -109,7 +109,7 @@ function assertAccessToken(body: unknown): { access_token: string } {
   return { access_token: (body as { access_token: string }).access_token };
 }
 
-function normalizePermissionItems(items: IamPermissionResponse['permission_points']): string[] {
+export function normalizePermissionItems(items: IamPermissionResponse['permission_points']): string[] {
   if (!Array.isArray(items)) return [];
   return items.flatMap((item) => {
     if (typeof item === 'string') return [item];

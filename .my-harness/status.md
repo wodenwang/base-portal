@@ -2,9 +2,58 @@
 
 项目：`base-portal`
 
-版本：`v0.1.2`
+版本：`v0.2.0`
 
-状态：`COMPLETE_V0.1.2_RELEASED_AND_DEPLOYED`
+状态：`V0.2.0_STEP13_SHIP_IN_PROGRESS`
+
+## v0.2.0 当前判断
+
+推荐方向：真实 Feishu IAM 接入验收 + 第三方应用接入运营化。
+
+当前下一步：Step 13/14 ship。Step 12 review 已完成，正在进入 Git/release closeout 和部署闭环。
+
+关键证据：
+
+- `v0.1.2` 已闭环并部署，线上 `/version` 读回 `0.1.2`。
+- `AGENTS.md` 已固定 Feishu IAM 接入、安全和 secret 边界。
+- `DESIGN.md` 明确当前不是完整 Admin Console / CRUD 后台，也不是企业工作台。
+- `DEPLOY.md` 要求版本化 Docker image、`install.sh` / `upgrade.sh`、健康检查和生产读回。
+- 用户已确认 v0.2.0 范围为真实 IAM 验收 + 一个第三方应用接入包。
+- ops API 已扩展 `/api/ops/import-app-package` 和 `/api/ops/sync-iam-resources`，覆盖 permission point、permission group、绑定、dry-run/apply 和审计边界。
+- GitHub #6-#9 是 v0.1.2 housekeeping；#10 是视觉小修候选，不应抢占 v0.2.0 主目标。
+- 用户已确认 Step 2 D1 选择 A：不新增配置 UI，只做文件导入 + ops API + 真实用户路径验收。
+- Step 2 Product Design planning review 记录：`design/2026-06-19-v0.2.0-product-design-planning-review.md`
+- Step 3 设计制品判断记录：`design/2026-06-19-v0.2.0-step3-design-artifact-decision.md`
+- Step 5 工程评审记录：`docs/superpowers/specs/2026-06-19-v0.2.0-engineering-review.md`
+- Step 6 实施计划：`IMPLEMENTATION_PLAN.md`、`docs/superpowers/plans/2026-06-19-v0.2.0-iam-app-package.md`
+- Step 7 实现：`config/portal-apps/base-portal-demo.json`、`apps/api/src/modules/ops.service.ts`
+- v0.2.0 发布说明：`docs/release-v0.2.0.md`
+- 本地验证：`docs/verification/2026-06-19-v0.2.0-local-verification.md`
+- Step 12 review：`docs/reviews/2026-06-19-v0.2.0-pre-landing-review.md`
+
+v0.2.0 Discovery 记录：`.my-harness/runs/2026-06-19-v0.2.0-discovery.md`
+
+## v0.2.0 15-Step Ledger
+
+| Step | Gate | Status | Evidence |
+|---:|---|---|---|
+| 1 | Discovery / Brainstorm | complete | 用户确认 D1=B，v0.2.0 做真实 IAM 验收 + 一个第三方应用接入包 |
+| 2 | Product/design planning review | complete | 用户确认 D1=A，不新增配置 UI |
+| 3 | Design artifact / visual target | skipped | 无新增主要 UI，沿用现有 `Light Command Workspace`，见 `design/2026-06-19-v0.2.0-step3-design-artifact-decision.md` |
+| 4 | Product design review | skipped | Step 3 未产生新增设计制品，无需额外评审 |
+| 5 | Eng review | complete | `docs/superpowers/specs/2026-06-19-v0.2.0-engineering-review.md` |
+| 6 | Writing plan | complete | `IMPLEMENTATION_PLAN.md`、`docs/superpowers/plans/2026-06-19-v0.2.0-iam-app-package.md` |
+| 7 | Executing plan | complete | 已实现接入包导入、IAM sync、权限过滤测试、版本默认值和 release docs |
+| 8 | Verification before completion | complete | `pnpm check`、`pnpm build`、Compose config、shell syntax、diff check 通过 |
+| 9 | Browser verification | complete | Playwright desktop/mobile/demo-domain 截图，console error 0 |
+| 10 | Visual QA | skipped | v0.2.0 未新增主要 UI，Step 3 已判定沿用 Light Command Workspace |
+| 11 | Functional QA | complete | 本地 mock-admin 覆盖导入 dry-run/apply、sync dry-run、导航可见性、审计读回 |
+| 12 | Review | complete | `docs/reviews/2026-06-19-v0.2.0-pre-landing-review.md`，2 个边界问题已 auto-fixed 并复验 |
+| 13 | Git closeout | current | 整理 release boundary |
+| 14 | Ship | pending | 创建 tag/release 并 push |
+| 15 | Land and deploy | pending | 部署并线上健康/真实链路验证 |
+
+---
 
 ## v0.1.2 范围
 

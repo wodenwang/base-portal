@@ -1,0 +1,51 @@
+- main [ref=e4] [box=0,0,390,844]:
+  - generic [ref=e5] [box=0,0,390,52]:
+    - button "打开菜单" [ref=e6] [cursor=pointer] [box=10,4,44,44]:
+      - img [ref=e7] [box=23,17,18,18]
+    - generic [ref=e8] [box=64,12,208,28]:
+      - img [ref=e10] [box=78,12,28,28]
+      - generic [ref=e14] [box=114,16,79,20]: Base Portal
+    - button "本地测试用户" [ref=e16] [cursor=pointer] [box=318,4,62,44]:
+      - img [ref=e18] [box=330,17,18,18]
+      - img [ref=e22] [box=358,19,13,13]
+  - generic [ref=e24] [box=0,52,390,792]:
+    - complementary [ref=e25] [box=-315,58,300,786]:
+      - generic [ref=e26] [box=-315,58,284,52]:
+        - generic [ref=e27] [box=-301,74,52,20]: 运营中心
+        - button "收起菜单" [ref=e28] [cursor=pointer] [box=-189,62,44,44]:
+          - img [ref=e29] [box=-175,76,16,16]
+        - button "关闭菜单" [ref=e32] [cursor=pointer] [box=-85,62,44,44]:
+          - img [ref=e33] [box=-71,76,16,16]
+      - button "工作台" [ref=e36] [cursor=pointer] [box=-307,118,264,44]:
+        - img [ref=e37] [box=-298,132,17,17]
+        - generic [ref=e40] [box=-273,130,39,20]: 工作台
+      - generic [ref=e41] [box=-315,165,284,763]:
+        - generic [ref=e42] [box=-308,168,270,176]:
+          - button "客户管理" [expanded] [ref=e43] [cursor=pointer] [box=-308,168,270,44]
+          - generic [ref=e50] [box=-308,212,270,132]
+        - generic [ref=e66] [box=-308,344,270,88]:
+          - button "业务办理" [expanded] [ref=e67] [cursor=pointer] [box=-308,344,270,44]
+          - button "订单中心" [ref=e76] [cursor=pointer] [box=-308,388,270,44]
+        - generic [ref=e80] [box=-308,432,270,132]:
+          - button "商机管理" [expanded] [ref=e81] [cursor=pointer] [box=-308,432,270,44]
+          - generic [ref=e88] [box=-308,476,270,88]
+        - generic [ref=e99] [box=-308,564,270,132]:
+          - button "合同管理" [expanded] [ref=e100] [cursor=pointer] [box=-308,564,270,44]
+          - generic [ref=e107] [box=-308,608,270,88]
+        - generic [ref=e118] [box=-308,696,270,88]:
+          - button "数据中心" [expanded] [ref=e119] [cursor=pointer] [box=-308,696,270,44]
+          - button "报表中心" [ref=e128] [cursor=pointer] [box=-308,740,270,44]
+        - generic [ref=e132] [box=-308,784,270,132]:
+          - button "系统管理" [expanded] [ref=e133] [cursor=pointer] [box=-308,784,270,44]
+          - generic [ref=e140] [box=-308,828,270,88]
+    - generic [ref=e151] [box=0,52,390,792]:
+      - generic [ref=e152] [box=0,52,390,50]:
+        - button "运营中心" [ref=e154] [cursor=pointer] [box=10,55,112,44]
+        - button "标签操作" [ref=e156] [cursor=pointer] [box=336,55,44,44]:
+          - img [ref=e157] [box=351,69,15,15]
+      - generic [ref=e162] [box=10,112,370,722]:
+        - img [ref=e164] [box=61,163,34,34]
+        - generic [ref=e166] [box=35,247,320,112]:
+          - paragraph [ref=e167] [box=35,247,320,20]: 当前功能域
+          - heading "运营中心" [level=1] [ref=e168] [box=35,275,320,20]
+          - paragraph [ref=e169] [box=35,305,320,54]: 统一进入运营类系统，处理日常业务、数据维护和跨系统协作。

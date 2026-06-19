@@ -1,0 +1,61 @@
+- main [ref=e4] [box=0,0,1440,1000]:
+  - generic [ref=e5] [box=0,0,1440,52]:
+    - generic [ref=e6] [box=0,12,208,28]:
+      - img [ref=e8] [box=14,12,28,28]
+      - generic [ref=e12] [box=50,16,79,20]: Base Portal
+    - navigation "功能域" [ref=e13] [box=208,10,142,32]:
+      - button "运营中心" [ref=e14] [cursor=pointer] [box=221,10,116,32]:
+        - img [ref=e15] [box=232,18,15,15]
+        - generic [ref=e17] [box=254,16,52,20]: 运营中心
+        - img [ref=e18] [box=313,19,13,13]
+    - generic [ref=e20] [box=1158,10,268,32]:
+      - generic "门户工具" [ref=e21] [box=1158,11,111,30]:
+        - button "搜索" [ref=e22] [cursor=pointer] [box=1158,11,30,30]:
+          - img [ref=e23] [box=1164,17,18,18]
+        - button "帮助" [ref=e26] [cursor=pointer] [box=1193,11,30,30]:
+          - img [ref=e27] [box=1199,17,18,18]
+        - button "通知" [ref=e30] [cursor=pointer] [box=1228,11,30,30]:
+          - img [ref=e31] [box=1234,17,18,18]
+      - button "本地测试用户" [ref=e34] [cursor=pointer] [box=1279,10,147,32]:
+        - img [ref=e36] [box=1291,17,18,18]
+        - generic [ref=e40] [box=1319,16,78,20]: 本地测试用户
+        - img [ref=e41] [box=1404,19,13,13]
+  - generic [ref=e43] [box=0,52,1440,948]:
+    - complementary [ref=e44] [box=0,52,208,948]:
+      - generic [ref=e45] [box=0,52,207,42]:
+        - generic [ref=e46] [box=14,63,52,20]: 运营中心
+        - button "收起菜单" [ref=e47] [cursor=pointer] [box=167,58,30,30]:
+          - img [ref=e48] [box=174,65,16,16]
+      - button "工作台" [ref=e51] [cursor=pointer] [box=8,102,187,32]:
+        - img [ref=e52] [box=17,110,17,17]
+        - generic [ref=e55] [box=42,108,39,20]: 工作台
+      - generic [ref=e56] [box=0,137,207,542]:
+        - generic [ref=e57] [box=7,140,193,124]:
+          - button "客户管理" [expanded] [ref=e58] [cursor=pointer] [box=7,140,193,31]
+          - generic [ref=e65] [box=7,171,193,93]
+        - generic [ref=e81] [box=7,264,193,62]:
+          - button "业务办理" [expanded] [ref=e82] [cursor=pointer] [box=7,264,193,31]
+          - button "订单中心" [ref=e91] [cursor=pointer] [box=7,295,193,31]
+        - generic [ref=e95] [box=7,326,193,93]:
+          - button "商机管理" [expanded] [ref=e96] [cursor=pointer] [box=7,326,193,31]
+          - generic [ref=e103] [box=7,357,193,62]
+        - generic [ref=e114] [box=7,419,193,93]:
+          - button "合同管理" [expanded] [ref=e115] [cursor=pointer] [box=7,419,193,31]
+          - generic [ref=e122] [box=7,450,193,62]
+        - generic [ref=e133] [box=7,512,193,62]:
+          - button "数据中心" [expanded] [ref=e134] [cursor=pointer] [box=7,512,193,31]
+          - button "报表中心" [ref=e143] [cursor=pointer] [box=7,543,193,31]
+        - generic [ref=e147] [box=7,574,193,93]:
+          - button "系统管理" [expanded] [ref=e148] [cursor=pointer] [box=7,574,193,31]
+          - generic [ref=e155] [box=7,605,193,62]
+    - generic [ref=e166] [box=208,52,1232,948]:
+      - generic [ref=e167] [box=208,52,1232,42]:
+        - button "运营中心" [ref=e169] [cursor=pointer] [box=218,57,118,31]
+        - button "标签操作" [ref=e171] [cursor=pointer] [box=1400,58,30,30]:
+          - img [ref=e172] [box=1408,65,15,15]
+      - generic [ref=e177] [box=217,103,1214,888]:
+        - img [ref=e179] [box=302,530,34,34]
+        - generic [ref=e181] [box=386,504,448,85]:
+          - paragraph [ref=e182] [box=386,504,448,20]: 当前功能域
+          - heading "运营中心" [level=1] [ref=e183] [box=386,532,448,20]
+          - paragraph [ref=e184] [box=386,562,448,27]: 统一进入运营类系统，处理日常业务、数据维护和跨系统协作。

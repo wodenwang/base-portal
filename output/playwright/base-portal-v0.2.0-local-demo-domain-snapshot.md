@@ -1,0 +1,52 @@
+- main [ref=e4] [box=0,0,1440,1000]:
+  - generic [ref=e5] [box=0,0,1440,52]:
+    - generic [ref=e8] [box=0,12,208,28]:
+      - img [ref=e10] [box=14,12,28,28]
+      - generic [ref=e14] [box=50,16,79,20]: Base Portal
+    - navigation "功能域" [ref=e170] [box=208,10,142,32]:
+      - button "示例接入" [active] [ref=e200] [cursor=pointer] [box=221,10,116,32]:
+        - img [ref=e172] [box=232,18,15,15]
+        - generic [ref=e174] [box=254,16,52,20]: 示例接入
+        - img [ref=e175] [box=313,19,13,13]
+    - generic [ref=e15] [box=1158,10,268,32]:
+      - generic "门户工具" [ref=e177] [box=1158,11,111,30]:
+        - button "搜索" [ref=e178] [cursor=pointer] [box=1158,11,30,30]:
+          - img [ref=e179] [box=1164,17,18,18]
+        - button "帮助" [ref=e182] [cursor=pointer] [box=1193,11,30,30]:
+          - img [ref=e183] [box=1199,17,18,18]
+        - button "通知" [ref=e186] [cursor=pointer] [box=1228,11,30,30]:
+          - img [ref=e187] [box=1234,17,18,18]
+      - button "本地测试用户" [ref=e16] [cursor=pointer] [box=1279,10,147,32]:
+        - img [ref=e18] [box=1291,17,18,18]
+        - generic [ref=e190] [box=1319,16,78,20]: 本地测试用户
+        - img [ref=e22] [box=1404,19,13,13]
+  - generic [ref=e24] [box=0,52,1440,948]:
+    - complementary [ref=e25] [box=0,52,208,948]:
+      - generic [ref=e26] [box=0,52,207,42]:
+        - generic [ref=e27] [box=14,63,52,20]: 示例接入
+        - button "收起菜单" [ref=e28] [cursor=pointer] [box=167,58,30,30]:
+          - img [ref=e29] [box=174,65,16,16]
+      - button "工作台" [ref=e36] [cursor=pointer] [box=8,102,187,32]:
+        - img [ref=e37] [box=17,110,17,17]
+        - generic [ref=e40] [box=42,108,39,20]: 工作台
+      - generic [ref=e201] [box=7,140,193,93]:
+        - button "示例系统" [expanded] [ref=e202] [cursor=pointer] [box=7,140,193,31]:
+          - img [ref=e204] [box=17,148,15,15]
+          - generic [ref=e206] [box=39,146,52,20]: 示例系统
+          - img [ref=e207] [box=177,149,14,14]
+        - generic [ref=e209] [box=7,171,193,62]:
+          - button "内嵌入口" [ref=e211] [cursor=pointer] [box=7,171,193,31]:
+            - generic [ref=e214] [box=55,177,52,20]: 内嵌入口
+          - button "新窗口入口" [ref=e216] [cursor=pointer] [box=7,202,193,31]:
+            - generic [ref=e219] [box=55,208,65,20]: 新窗口入口
+    - generic [ref=e151] [box=208,52,1232,948]:
+      - generic [ref=e152] [box=208,52,1232,42]:
+        - button "示例接入" [ref=e220] [cursor=pointer] [box=218,57,118,31]
+        - button "标签操作" [ref=e156] [cursor=pointer] [box=1400,58,30,30]:
+          - img [ref=e157] [box=1408,65,15,15]
+      - generic [ref=e162] [box=217,103,1214,888]:
+        - img [ref=e221] [box=302,530,34,34]
+        - generic [ref=e166] [box=386,504,453,85]:
+          - paragraph [ref=e167] [box=386,504,453,20]: 当前功能域
+          - heading "示例接入" [level=1] [ref=e225] [box=386,532,453,20]
+          - paragraph [ref=e169] [box=386,562,453,27]: 用于验证 v0.2.0 第三方应用接入包、权限同步和真实用户路径。

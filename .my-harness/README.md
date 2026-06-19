@@ -1,10 +1,19 @@
 # Base Portal my-harness Index
 
-当前迭代：`v0.1.2`
+当前迭代：`v0.2.0`
 
 主入口：
 
 - 当前状态：`.my-harness/status.md`
+- v0.2.0 Discovery：`.my-harness/runs/2026-06-19-v0.2.0-discovery.md`
+- v0.2.0 Product Design planning review：`design/2026-06-19-v0.2.0-product-design-planning-review.md`
+- v0.2.0 Step 3 design artifact decision：`design/2026-06-19-v0.2.0-step3-design-artifact-decision.md`
+- v0.2.0 engineering review：`docs/superpowers/specs/2026-06-19-v0.2.0-engineering-review.md`
+- v0.2.0 implementation plan：`docs/superpowers/plans/2026-06-19-v0.2.0-iam-app-package.md`
+- v0.2.0 run ledger：`.my-harness/runs/2026-06-19-v0.2.0.md`
+- v0.2.0 release notes：`docs/release-v0.2.0.md`
+- v0.2.0 local verification：`docs/verification/2026-06-19-v0.2.0-local-verification.md`
+- v0.2.0 review：`docs/reviews/2026-06-19-v0.2.0-pre-landing-review.md`
 - 本轮运行记录：`.my-harness/runs/2026-06-19-v0.1.2.md`
 - 实施计划：`IMPLEMENTATION_PLAN.md`
 - 部署规范：`DEPLOY.md`

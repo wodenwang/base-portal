@@ -20,7 +20,7 @@ export class HealthController {
   version(): { name: string; version: string; commit: string; node_env: string } {
     return {
       name: 'base-portal-api',
-      version: process.env.APP_VERSION ?? '0.1.2',
+      version: process.env.APP_VERSION ?? '0.2.0',
       commit: process.env.GIT_COMMIT ?? 'local',
       node_env: process.env.NODE_ENV ?? 'development'
     };
