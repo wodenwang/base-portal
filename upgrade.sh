@@ -86,9 +86,10 @@ sync_release_files() {
   ssh "$HOST" "mkdir -p ${remote_dir_q}/releases/${to_version_q} ${remote_dir_q}/backups"
   COPYFILE_DISABLE=1 tar --no-xattrs -cf - \
     DEPLOY.md README.md install.sh upgrade.sh \
+    config/portal-apps/base-portal-demo.json \
     deploy/docker-compose.yml deploy/.env.example deploy/web.Dockerfile \
     | ssh "$HOST" "rm -rf ${remote_dir_q}/releases/${to_version_q} && mkdir -p ${remote_dir_q}/releases/${to_version_q} && tar -xf - -C ${remote_dir_q}/releases/${to_version_q}"
-  ssh "$HOST" "cp ${remote_dir_q}/releases/${to_version_q}/deploy/docker-compose.yml ${remote_dir_q}/deploy/docker-compose.yml && cp ${remote_dir_q}/releases/${to_version_q}/deploy/.env.example ${remote_dir_q}/deploy/.env.example"
+  ssh "$HOST" "cp ${remote_dir_q}/releases/${to_version_q}/deploy/docker-compose.yml ${remote_dir_q}/deploy/docker-compose.yml && cp ${remote_dir_q}/releases/${to_version_q}/deploy/.env.example ${remote_dir_q}/deploy/.env.example && rm -rf ${remote_dir_q}/config && cp -R ${remote_dir_q}/releases/${to_version_q}/config ${remote_dir_q}/config"
 }
 
 remote_upgrade() {
