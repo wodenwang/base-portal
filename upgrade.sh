@@ -43,6 +43,10 @@ require_cmd() {
   }
 }
 
+shell_quote() {
+  printf '%q' "$1"
+}
+
 reject_latest_image() {
   if [[ -z "$IMAGE" ]]; then
     echo "Production image is required. Pass --image <registry>/base-portal:$TO_VERSION or set BASE_PORTAL_IMAGE." >&2
@@ -60,16 +64,25 @@ reject_latest_image() {
 }
 
 sync_release_files() {
-  ssh "$HOST" "mkdir -p $REMOTE_DIR/releases/$TO_VERSION $REMOTE_DIR/backups"
+  local remote_dir_q to_version_q
+  remote_dir_q="$(shell_quote "$REMOTE_DIR")"
+  to_version_q="$(shell_quote "$TO_VERSION")"
+  ssh "$HOST" "mkdir -p ${remote_dir_q}/releases/${to_version_q} ${remote_dir_q}/backups"
   COPYFILE_DISABLE=1 tar --no-xattrs -cf - \
     DEPLOY.md README.md install.sh upgrade.sh \
     deploy/docker-compose.yml deploy/.env.example deploy/web.Dockerfile \
-    | ssh "$HOST" "rm -rf $REMOTE_DIR/releases/$TO_VERSION && mkdir -p $REMOTE_DIR/releases/$TO_VERSION && tar -xf - -C $REMOTE_DIR/releases/$TO_VERSION"
-  ssh "$HOST" "cp $REMOTE_DIR/releases/$TO_VERSION/deploy/docker-compose.yml $REMOTE_DIR/deploy/docker-compose.yml && cp $REMOTE_DIR/releases/$TO_VERSION/deploy/.env.example $REMOTE_DIR/deploy/.env.example"
+    | ssh "$HOST" "rm -rf ${remote_dir_q}/releases/${to_version_q} && mkdir -p ${remote_dir_q}/releases/${to_version_q} && tar -xf - -C ${remote_dir_q}/releases/${to_version_q}"
+  ssh "$HOST" "cp ${remote_dir_q}/releases/${to_version_q}/deploy/docker-compose.yml ${remote_dir_q}/deploy/docker-compose.yml && cp ${remote_dir_q}/releases/${to_version_q}/deploy/.env.example ${remote_dir_q}/deploy/.env.example"
 }
 
 remote_upgrade() {
-  ssh "$HOST" "EXPECTED_FROM='$FROM_VERSION' TARGET_VERSION='$TO_VERSION' APP_VERSION='$APP_VERSION' BASE_PORTAL_IMAGE='$IMAGE' REMOTE_DIR='$REMOTE_DIR' bash -s" <<'REMOTE'
+  local from_version_q to_version_q app_version_q image_q remote_dir_q
+  from_version_q="$(shell_quote "$FROM_VERSION")"
+  to_version_q="$(shell_quote "$TO_VERSION")"
+  app_version_q="$(shell_quote "$APP_VERSION")"
+  image_q="$(shell_quote "$IMAGE")"
+  remote_dir_q="$(shell_quote "$REMOTE_DIR")"
+  ssh "$HOST" "EXPECTED_FROM=${from_version_q} TARGET_VERSION=${to_version_q} APP_VERSION=${app_version_q} BASE_PORTAL_IMAGE=${image_q} REMOTE_DIR=${remote_dir_q} bash -s" <<'REMOTE'
 set -euo pipefail
 cd "$REMOTE_DIR"
 

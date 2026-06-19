@@ -90,7 +90,7 @@ export function closeAllTabs(state: WorkspaceState): WorkspaceState {
 
 export function closeOtherTabs(state: WorkspaceState, tabId: string): WorkspaceState {
   const target = state.tabs.find((tab) => tab.id === tabId);
-  if (!target) return closeAllTabs(state);
+  if (!target) return state;
   return {
     ...state,
     tabs: [target],
@@ -107,6 +107,15 @@ export function exitImmersiveTab(state: WorkspaceState, tabId: string): Workspac
   return {
     ...state,
     tabs: state.tabs.map((tab) => (tab.id === tabId ? { ...tab, openMode: 'iframe' } : tab)),
+    maximized: false
+  };
+}
+
+export function enterImmersiveTab(state: WorkspaceState, tabId: string): WorkspaceState {
+  return {
+    ...state,
+    activeTabId: tabId,
+    tabs: state.tabs.map((tab) => (tab.id === tabId ? { ...tab, openMode: 'immersive_iframe' } : tab)),
     maximized: false
   };
 }

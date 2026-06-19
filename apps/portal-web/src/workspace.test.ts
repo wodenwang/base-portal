@@ -4,6 +4,7 @@ import {
   closeOtherTabs,
   createHomeTabId,
   createInitialWorkspace,
+  enterImmersiveTab,
   exitImmersiveTab,
   openMenuTab,
   switchDomain
@@ -89,6 +90,26 @@ describe('workspace model', () => {
       maximized: false
     });
     expect(closeOtherTabs(maximized, 'menu:menu-ops-invoices').tabs).toHaveLength(1);
+  });
+
+  it('close other tabs ignores an unknown target tab instead of closing everything', () => {
+    const state = openMenuTab(createInitialWorkspace([domain]), domain, menu).state;
+
+    expect(closeOtherTabs(state, 'menu:missing')).toBe(state);
+  });
+
+  it('enters immersive mode for a target business tab', () => {
+    const state = openMenuTab(createInitialWorkspace([domain]), domain, menu).state;
+
+    expect(enterImmersiveTab(state, `menu:${menu.id}`)).toMatchObject({
+      activeTabId: `menu:${menu.id}`,
+      maximized: false,
+      tabs: [
+        expect.objectContaining({
+          openMode: 'immersive_iframe'
+        })
+      ]
+    });
   });
 
   it('exits immersive mode by restoring the tab to iframe mode', () => {

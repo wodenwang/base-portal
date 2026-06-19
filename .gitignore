@@ -6,7 +6,9 @@ dist/
 build/
 coverage/
 .turbo/
+.codegraph/
 deploy/data/
+outputs/logos/**/review-items.json
 
 # Local env and secrets
 .env

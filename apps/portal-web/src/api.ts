@@ -2,7 +2,8 @@ import type { NavigationResponse, SessionResponse } from './types';
 
 export async function fetchSession(): Promise<SessionResponse> {
   const response = await fetch('/api/session', { credentials: 'include' });
-  if (!response.ok) return { authenticated: false };
+  if (response.status === 401 || response.status === 403) return { authenticated: false };
+  if (!response.ok) throw new Error('session request failed');
   return await response.json() as SessionResponse;
 }
 

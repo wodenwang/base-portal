@@ -38,6 +38,7 @@
 - `DESIGN.md`：项目级 UI/UX 规范，已引用 Product Design 方案 2。
 - `design/base-portal-final-design-option-2.md`：本轮前端定稿设计说明。
 - `design/base-portal-selected-option-2-light-command-workspace.png`：本轮静态视觉稿。
+- `docs/superpowers/plans/2026-06-19-high-fidelity-portal-restoration.md`：Product Design `design-qa` 后续高保真修复计划。
 - `apps/portal-web/src/workspace.ts`：Portal tab 和 workspace 状态管理。
 - `apps/portal-web/src/App.tsx`：Portal 壳 UI 组合。
 - `apps/portal-web/src/styles.css`：当前前端样式入口。

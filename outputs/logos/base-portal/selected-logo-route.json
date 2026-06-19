@@ -1,0 +1,24 @@
+{
+  "id": "gateway-mark",
+  "label": "入口门廊",
+  "family": "symbol",
+  "selected_at": "2026-06-19",
+  "brand_name": "Base Portal",
+  "category": "enterprise internal portal shell",
+  "source_image": "outputs/logos/base-portal/ig_0bf0f120eac1abc1016a34ddc618bc819ab1cf1b5b531afa62.png",
+  "implemented_as": "apps/portal-web/src/App.tsx#BrandMark",
+  "rationale": "抽象门户入口隐喻清晰，小尺寸下比字母 BP 更稳定，适合企业门户 TopBar、favicon 和登录页品牌标识。",
+  "preserve": [
+    "深色门户外框",
+    "青绿色入口面",
+    "28px TopBar mark 可读性",
+    "不依赖生成文字"
+  ],
+  "avoid": [
+    "复杂字标",
+    "高细节纹理",
+    "营销式渐变",
+    "与 Feishu IAM 或第三方品牌混淆"
+  ],
+  "next_step": "如需正式品牌包，基于当前 SVG 进一步导出 favicon、PNG 多尺寸和生产矢量源文件。"
+}

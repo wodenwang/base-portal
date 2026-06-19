@@ -52,6 +52,10 @@ require_cmd() {
   }
 }
 
+shell_quote() {
+  printf '%q' "$1"
+}
+
 reject_latest_image() {
   if [[ -z "$IMAGE" ]]; then
     echo "Production image is required. Pass --image <registry>/base-portal:$VERSION or set BASE_PORTAL_IMAGE." >&2
@@ -104,16 +108,24 @@ configure_dns() {
 }
 
 sync_release_files() {
-  ssh "$HOST" "mkdir -p $REMOTE_DIR/deploy $REMOTE_DIR/releases/$VERSION $REMOTE_DIR/backups $REMOTE_DIR/data/postgres $REMOTE_DIR/.deploy"
+  local remote_dir_q version_q
+  remote_dir_q="$(shell_quote "$REMOTE_DIR")"
+  version_q="$(shell_quote "$VERSION")"
+  ssh "$HOST" "mkdir -p ${remote_dir_q}/deploy ${remote_dir_q}/releases/${version_q} ${remote_dir_q}/backups ${remote_dir_q}/data/postgres ${remote_dir_q}/.deploy"
   COPYFILE_DISABLE=1 tar --no-xattrs -cf - \
     DEPLOY.md README.md install.sh upgrade.sh \
     deploy/docker-compose.yml deploy/.env.example deploy/web.Dockerfile \
-    | ssh "$HOST" "rm -rf $REMOTE_DIR/releases/$VERSION && mkdir -p $REMOTE_DIR/releases/$VERSION && tar -xf - -C $REMOTE_DIR/releases/$VERSION"
-  ssh "$HOST" "cp $REMOTE_DIR/releases/$VERSION/deploy/docker-compose.yml $REMOTE_DIR/deploy/docker-compose.yml && cp $REMOTE_DIR/releases/$VERSION/deploy/.env.example $REMOTE_DIR/deploy/.env.example"
+    | ssh "$HOST" "rm -rf ${remote_dir_q}/releases/${version_q} && mkdir -p ${remote_dir_q}/releases/${version_q} && tar -xf - -C ${remote_dir_q}/releases/${version_q}"
+  ssh "$HOST" "cp ${remote_dir_q}/releases/${version_q}/deploy/docker-compose.yml ${remote_dir_q}/deploy/docker-compose.yml && cp ${remote_dir_q}/releases/${version_q}/deploy/.env.example ${remote_dir_q}/deploy/.env.example"
 }
 
 remote_install() {
-  ssh "$HOST" "TARGET_VERSION='$VERSION' APP_VERSION='$APP_VERSION' BASE_PORTAL_IMAGE='$IMAGE' REMOTE_DIR='$REMOTE_DIR' bash -s" <<'REMOTE'
+  local version_q app_version_q image_q remote_dir_q
+  version_q="$(shell_quote "$VERSION")"
+  app_version_q="$(shell_quote "$APP_VERSION")"
+  image_q="$(shell_quote "$IMAGE")"
+  remote_dir_q="$(shell_quote "$REMOTE_DIR")"
+  ssh "$HOST" "TARGET_VERSION=${version_q} APP_VERSION=${app_version_q} BASE_PORTAL_IMAGE=${image_q} REMOTE_DIR=${remote_dir_q} bash -s" <<'REMOTE'
 set -euo pipefail
 cd "$REMOTE_DIR"
 
@@ -212,7 +224,10 @@ configure_nginx() {
     return
   fi
 
-  ssh "$HOST" "DOMAIN='$DOMAIN' REMOTE_DIR='$REMOTE_DIR' bash -s" <<'REMOTE'
+  local domain_q remote_dir_q
+  domain_q="$(shell_quote "$DOMAIN")"
+  remote_dir_q="$(shell_quote "$REMOTE_DIR")"
+  ssh "$HOST" "DOMAIN=${domain_q} REMOTE_DIR=${remote_dir_q} bash -s" <<'REMOTE'
 set -euo pipefail
 NGINX_DIR="$HOME/nginx"
 NGINX_CONF="$NGINX_DIR/nginx.conf"

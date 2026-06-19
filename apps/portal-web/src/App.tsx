@@ -1,15 +1,25 @@
 import { useEffect, useMemo, useState, type CSSProperties, type ReactElement } from 'react';
 import {
+  BarChart3,
   Bell,
   Boxes,
   BookOpen,
+  BriefcaseBusiness,
+  Building2,
+  CalendarDays,
   ChartNoAxesCombined,
+  CheckCircle2,
   ChevronDown,
   ChevronsLeft,
   ChevronsRight,
   CircleHelp,
+  Copy,
+  Database,
   ExternalLink,
+  FileText,
+  FolderClosed,
   FolderKanban,
+  Gauge,
   Home,
   LayoutDashboard,
   ListChecks,
@@ -17,18 +27,39 @@ import {
   Maximize2,
   Menu,
   Minimize2,
+  MoreHorizontal,
   MoreVertical,
   PanelsTopLeft,
+  Plus,
   RefreshCw,
   ReceiptText,
   Search,
+  Settings,
+  ShieldCheck,
+  SlidersHorizontal,
   UserCircle,
+  UserCog,
   UsersRound,
   Workflow,
   Wrench,
   X
 } from 'lucide-react';
 import { fetchNavigation, fetchSession, logout, recordMenuOpened } from './api';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger
+} from './components/ui/context-menu';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from './components/ui/dropdown-menu';
 import type { NavigationDomain, NavigationMenu, PortalUser, WorkspaceTab } from './types';
 import {
   closeAllTabs,
@@ -36,6 +67,7 @@ import {
   closeTab,
   createHomeTabId,
   createInitialWorkspace,
+  enterImmersiveTab,
   exitImmersiveTab,
   hasConfirmTabs,
   openMenuTab,
@@ -44,14 +76,25 @@ import {
 } from './workspace';
 
 const icons = {
+  BarChart3,
   Boxes,
   BookOpen,
+  BriefcaseBusiness,
+  Building2,
+  CalendarDays,
   ChartNoAxesCombined,
+  Database,
+  FileText,
   FolderKanban,
+  Gauge,
   LayoutDashboard,
   ListChecks,
   PanelsTopLeft,
   ReceiptText,
+  Settings,
+  ShieldCheck,
+  SlidersHorizontal,
+  UserCog,
   UsersRound,
   Workflow,
   Wrench
@@ -107,7 +150,8 @@ export function App(): ReactElement {
 
   if (loading) return <LoadingScreen />;
   if (bootstrapError) return <ErrorScreen message={bootstrapError} onRetry={() => void bootstrap()} />;
-  if (!user || !workspace || !activeDomain) return <LoginScreen />;
+  if (!user || !workspace) return <LoginScreen />;
+  if (!activeDomain) return <EmptyPermissionScreen user={user} onRetry={() => void bootstrap()} onLogout={() => void handleLogout()} />;
 
   function requireWorkspace(): WorkspaceState {
     if (!workspace) throw new Error('workspace is not initialized');
@@ -125,18 +169,19 @@ export function App(): ReactElement {
 
   function handleOpenMenu(menu: NavigationMenu): void {
     if (!menu.isLeaf || !menu.url) return;
-    void recordMenuOpened({
-      domainKey: activeDomain.key,
-      domainName: activeDomain.name,
-      menuId: menu.id,
-      menuTitle: menu.title,
-      openMode: menu.openMode ?? 'iframe'
-    });
     const result = openMenuTab(requireWorkspace(), activeDomain, menu);
     if (result.reason === 'limit') {
       window.alert('最多同时打开 20 个业务标签页，请关闭已有标签页后再打开。');
       return;
     }
+    const openedTab = result.state.tabs.find((tab) => tab.menuId === menu.id);
+    void recordMenuOpened({
+      domainKey: activeDomain.key,
+      domainName: activeDomain.name,
+      menuId: menu.id,
+      menuTitle: menu.title,
+      openMode: openedTab?.openMode ?? 'iframe'
+    });
     setWorkspace(result.state);
     setMobileMenuOpen(false);
   }
@@ -191,7 +236,7 @@ export function App(): ReactElement {
             <Menu size={18} />
           </button>
           <div className="brand">
-            <span className="brand-mark">BP</span>
+            <BrandMark />
             <span>Base Portal</span>
           </div>
           {!isImmersive && <DomainNav domains={domains} activeKey={activeDomain.key} onSwitch={handleDomainSwitch} />}
@@ -250,6 +295,7 @@ export function App(): ReactElement {
               onClose={handleCloseTab}
               onCloseAll={handleCloseAll}
               onCloseOthers={handleCloseOthers}
+              onEnterImmersive={(tabId) => setWorkspace(enterImmersiveTab(workspace, tabId))}
               onMaximize={handleMaximizeTab}
               onExitImmersive={() => {
                 if (activeBusinessTab) {
@@ -279,57 +325,34 @@ export function App(): ReactElement {
 }
 
 function UserMenu(props: { user: PortalUser; onLogout: () => void }): ReactElement {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open) return;
-    function handleKeyDown(event: KeyboardEvent): void {
-      if (event.key === 'Escape') setOpen(false);
-    }
-    function handlePointerDown(event: PointerEvent): void {
-      const target = event.target;
-      if (!(target instanceof HTMLElement) || !target.closest('.user-menu')) setOpen(false);
-    }
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('pointerdown', handlePointerDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('pointerdown', handlePointerDown);
-    };
-  }, [open]);
-
   return (
-    <div className="user-menu">
-      <button
-        className="user-menu-trigger"
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        title={props.user.name}
-        onClick={() => setOpen((value) => !value)}
-      >
-        <span className="avatar" aria-hidden="true">
-          {props.user.avatarUrl ? <img src={props.user.avatarUrl} alt="" /> : <UserCircle size={20} />}
-        </span>
-        <span className="user-name">{props.user.name}</span>
-        <ChevronDown size={14} />
-      </button>
-      {open && (
-        <div className="dropdown-menu user-dropdown" role="menu">
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              props.onLogout();
-            }}
-          >
-            <LogOut size={15} />
-            <span>退出登录</span>
-          </button>
-        </div>
-      )}
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="user-menu-trigger" type="button" title={props.user.name}>
+          <span className="avatar" aria-hidden="true">
+            {props.user.avatarUrl ? <img src={props.user.avatarUrl} alt="" /> : <UserCircle size={18} />}
+          </span>
+          <span className="user-name">{props.user.name}</span>
+          <ChevronDown size={13} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="user-dropdown">
+        <DropdownMenuLabel className="user-dropdown-profile">
+          <span className="avatar avatar-lg" aria-hidden="true">
+            {props.user.avatarUrl ? <img src={props.user.avatarUrl} alt="" /> : <UserCircle size={22} />}
+          </span>
+          <span>
+            <strong>{props.user.name}</strong>
+            <small>{props.user.id}</small>
+          </span>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={props.onLogout}>
+          <LogOut size={14} />
+          <span>退出登录</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -353,7 +376,7 @@ function LoginScreen(): ReactElement {
   return (
     <div className="login-screen">
       <div className="login-panel">
-        <span className="brand-mark">BP</span>
+        <BrandMark large />
         <h1>Base Portal</h1>
         <p>企业门户入口，使用 Feishu IAM 登录后访问已授权的系统菜单。</p>
         <a className="primary-button" href="/api/auth/login">使用 Feishu IAM 登录</a>
@@ -363,64 +386,67 @@ function LoginScreen(): ReactElement {
   );
 }
 
+function EmptyPermissionScreen(props: { user: PortalUser; onRetry: () => void; onLogout: () => void }): ReactElement {
+  return (
+    <div className="center-screen">
+      <div className="status-panel">
+        <BrandMark large />
+        <h1>暂无可访问菜单</h1>
+        <p>{props.user.name} 当前没有 Base Portal 可访问权限，请联系管理员授权后刷新。</p>
+        <div className="status-actions">
+          <button className="primary-button" type="button" onClick={props.onRetry}>刷新权限</button>
+          <button className="text-button" type="button" onClick={props.onLogout}>退出登录</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BrandMark({ large = false }: { large?: boolean }): ReactElement {
+  return (
+    <span className={`brand-mark ${large ? 'large' : ''}`} aria-hidden="true">
+      <svg viewBox="0 0 32 32" role="img" focusable="false">
+        <path
+          className="brand-mark-frame"
+          d="M16 3.8 26.8 10.1c.8.5 1.2 1.2 1.2 2.1v9.1c0 .9-.5 1.8-1.3 2.2l-4.4 2.5v-9.6c0-.9-.5-1.8-1.3-2.2l-5-2.9-5 2.9c-.8.4-1.3 1.3-1.3 2.2V26l-4.4-2.5A2.6 2.6 0 0 1 4 21.3v-9.1c0-.9.5-1.7 1.2-2.1L16 3.8Z"
+        />
+        <path className="brand-mark-door" d="M16 12.8 20.6 15.5v9.2L16 27.4V12.8Z" />
+        <path className="brand-mark-floor" d="M16 27.4 8.5 23.1 16 18.8l7.5 4.3L16 27.4Z" />
+      </svg>
+    </span>
+  );
+}
+
 function DomainNav(props: {
   domains: NavigationDomain[];
   activeKey: string;
   onSwitch: (domain: NavigationDomain) => void;
 }): ReactElement {
-  const [open, setOpen] = useState(false);
   const activeDomain = props.domains.find((domain) => domain.key === props.activeKey) ?? props.domains[0];
-
-  useEffect(() => {
-    if (!open) return;
-    function handleKeyDown(event: KeyboardEvent): void {
-      if (event.key === 'Escape') setOpen(false);
-    }
-    function handlePointerDown(event: PointerEvent): void {
-      const target = event.target;
-      if (!(target instanceof HTMLElement) || !target.closest('.domain-nav')) setOpen(false);
-    }
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('pointerdown', handlePointerDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('pointerdown', handlePointerDown);
-    };
-  }, [open]);
 
   return (
     <nav className="domain-nav" aria-label="功能域">
-      <button
-        className="domain-trigger"
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
-        title={activeDomain?.name}
-      >
-        <PanelsTopLeft size={16} />
-        <span>{activeDomain?.name ?? '功能域'}</span>
-        <ChevronDown size={14} />
-      </button>
-      {open && (
-        <div className="dropdown-menu domain-dropdown" role="menu">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="domain-trigger" type="button" title={activeDomain?.name}>
+            <PanelsTopLeft size={15} />
+            <span>{activeDomain?.name ?? '功能域'}</span>
+            <ChevronDown size={13} />
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="domain-dropdown">
           {props.domains.map((domain) => (
-            <button
+            <DropdownMenuItem
               key={domain.key}
-              type="button"
-              role="menuitem"
               className={domain.key === props.activeKey ? 'active' : ''}
-              onClick={() => {
-                setOpen(false);
-                props.onSwitch(domain);
-              }}
+              onSelect={() => props.onSwitch(domain)}
               title={domain.name}
             >
               <span>{domain.name}</span>
-            </button>
+            </DropdownMenuItem>
           ))}
-        </div>
-      )}
+        </DropdownMenuContent>
+      </DropdownMenu>
       <div className="domain-inline-list" aria-hidden="true">
         {props.domains.slice(0, 3).map((domain) => (
         <button
@@ -464,23 +490,40 @@ function MenuNode(props: {
   activeMenuId: string | null;
   onOpen: (menu: NavigationMenu) => void;
 }): ReactElement {
-  const Icon = icons[props.menu.icon as keyof typeof icons] ?? PanelsTopLeft;
   const active = props.activeMenuId === props.menu.id;
+  const children = props.menu.children ?? [];
+  const hasChildren = children.length > 0;
+  const [expanded, setExpanded] = useState(true);
+  const childrenId = `menu-children-${props.menu.id}`;
+
+  function handleMenuClick(): void {
+    if (props.menu.isLeaf) {
+      props.onOpen(props.menu);
+      return;
+    }
+    if (hasChildren) setExpanded((value) => !value);
+  }
+
   return (
     <div className={`menu-node level-${props.menu.level}`}>
       <button
-        className={`${props.menu.isLeaf ? 'menu-leaf' : 'menu-group'} ${active ? 'active' : ''}`}
+        type="button"
+        className={`${props.menu.isLeaf ? 'menu-leaf' : 'menu-group'} ${active ? 'active' : ''} ${expanded ? 'expanded' : 'collapsed'}`}
         aria-current={active ? 'page' : undefined}
-        onClick={() => props.menu.isLeaf && props.onOpen(props.menu)}
+        aria-expanded={!props.menu.isLeaf && hasChildren ? expanded : undefined}
+        aria-controls={!props.menu.isLeaf && hasChildren ? childrenId : undefined}
+        onClick={handleMenuClick}
         title={props.collapsed ? props.menu.title : undefined}
       >
-        <Icon size={17} />
+        <MenuGlyph isLeaf={props.menu.isLeaf} active={active} />
         {!props.collapsed && <span>{props.menu.title}</span>}
-        {!props.collapsed && !props.menu.isLeaf && <ChevronDown className="menu-chevron" size={14} />}
+        {!props.collapsed && !props.menu.isLeaf && hasChildren && (
+          <ChevronDown className={`menu-chevron ${expanded ? 'expanded' : ''}`} size={14} />
+        )}
       </button>
-      {!props.collapsed && props.menu.children.length > 0 && (
-        <div className="menu-children">
-          {props.menu.children.map((child) => (
+      {!props.collapsed && hasChildren && expanded && (
+        <div id={childrenId} className="menu-children">
+          {children.map((child) => (
             <MenuNode
               key={child.id}
               menu={child}
@@ -495,6 +538,22 @@ function MenuNode(props: {
   );
 }
 
+function MenuGlyph({ isLeaf, active }: { isLeaf: boolean; active: boolean }): ReactElement {
+  if (isLeaf) {
+    return (
+      <span className={`menu-leaf-dot ${active ? 'active' : ''}`} aria-hidden="true">
+        <span />
+      </span>
+    );
+  }
+
+  return (
+    <span className="menu-folder-icon" aria-hidden="true">
+      <FolderClosed size={15} />
+    </span>
+  );
+}
+
 function TabStrip(props: {
   domain: NavigationDomain;
   workspace: WorkspaceState;
@@ -502,141 +561,139 @@ function TabStrip(props: {
   onClose: (tabId: string) => void;
   onCloseAll: () => void;
   onCloseOthers: (tabId?: string) => void;
+  onEnterImmersive: (tabId: string) => void;
   onMaximize: (tabId: string) => void;
   onExitImmersive: () => void;
   immersive: boolean;
 }): ReactElement {
   const homeId = createHomeTabId(props.domain.key);
-  const [contextMenu, setContextMenu] = useState<{
-    tab: WorkspaceTab;
-    x: number;
-    y: number;
-  } | null>(null);
-
-  useEffect(() => {
-    if (!contextMenu) return;
-    function handleKeyDown(event: KeyboardEvent): void {
-      if (event.key === 'Escape') setContextMenu(null);
-    }
-    function handlePointerDown(event: PointerEvent): void {
-      const target = event.target;
-      if (!(target instanceof HTMLElement) || !target.closest('.tab-context-menu')) setContextMenu(null);
-    }
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('pointerdown', handlePointerDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('pointerdown', handlePointerDown);
-    };
-  }, [contextMenu]);
-
-  function closeContextMenu(): void {
-    setContextMenu(null);
-  }
+  const activeBusinessTab = props.workspace.tabs.find((tab) => tab.id === props.workspace.activeTabId) ?? null;
+  const hasBusinessTabs = props.workspace.tabs.length > 0;
 
   return (
     <div className="tab-strip">
       <div className="tabs-scroll">
         <button
-          className={`tab fixed ${props.workspace.activeTabId === homeId ? 'active' : ''}`}
+          className={`tab home-tab ${props.workspace.activeTabId === homeId ? 'active' : ''}`}
           onClick={() => props.onActivate(homeId)}
           title={props.domain.name}
         >
           {props.domain.name}
         </button>
         {props.workspace.tabs.map((tab) => (
-          <button
-            key={tab.id}
-            className={`tab ${props.workspace.activeTabId === tab.id ? 'active' : ''}`}
-            onClick={() => props.onActivate(tab.id)}
-            onContextMenu={(event) => {
-              event.preventDefault();
-              props.onActivate(tab.id);
-              setContextMenu({ tab, x: event.clientX, y: event.clientY });
-            }}
-            title={tab.title}
-          >
-            <span>{tab.title}</span>
-            <span
-              className="tab-close"
-              title="关闭当前标签"
-              onClick={(event) => {
-                event.stopPropagation();
-                props.onClose(tab.id);
-              }}
-            >
-              <X size={13} />
-            </span>
-          </button>
+          <ContextMenu key={tab.id}>
+            <ContextMenuTrigger asChild>
+              <button
+                className={`tab ${props.workspace.activeTabId === tab.id ? 'active' : ''}`}
+                onClick={() => props.onActivate(tab.id)}
+                onContextMenu={() => props.onActivate(tab.id)}
+                title={tab.title}
+              >
+                <span>{tab.title}</span>
+                <span
+                  className="tab-close"
+                  title="关闭当前标签"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    props.onClose(tab.id);
+                  }}
+                >
+                  <X size={12} />
+                </span>
+              </button>
+            </ContextMenuTrigger>
+            <ContextMenuContent>
+              <ContextMenuItem onSelect={() => window.open(tab.url, '_blank', 'noopener,noreferrer')}>
+                <ExternalLink size={14} />
+                <span>新窗口打开</span>
+              </ContextMenuItem>
+              <ContextMenuItem onSelect={() => props.onMaximize(tab.id)}>
+                <Maximize2 size={14} />
+                <span>最大化</span>
+              </ContextMenuItem>
+              <ContextMenuItem onSelect={() => props.onEnterImmersive(tab.id)}>
+                <PanelsTopLeft size={14} />
+                <span>沉浸模式</span>
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuItem onSelect={() => props.onClose(tab.id)}>
+                <X size={14} />
+                <span>关闭当前</span>
+              </ContextMenuItem>
+              <ContextMenuItem onSelect={() => props.onCloseOthers(tab.id)}>
+                <Copy size={14} />
+                <span>关闭其他</span>
+              </ContextMenuItem>
+              <ContextMenuItem onSelect={props.onCloseAll}>
+                <MoreHorizontal size={14} />
+                <span>关闭全部</span>
+              </ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
         ))}
       </div>
       <div className="tab-actions">
         {props.immersive && <button onClick={props.onExitImmersive}>退出沉浸</button>}
-        <button className="icon-button" type="button" aria-label="标签操作提示" title="右键业务标签打开更多操作">
-          <MoreVertical size={16} />
-        </button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="icon-button" type="button" aria-label="标签操作" title="标签操作">
+              <MoreVertical size={15} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="tab-action-menu">
+            <DropdownMenuItem
+              disabled={!activeBusinessTab}
+              onSelect={() => {
+                if (activeBusinessTab) window.open(activeBusinessTab.url, '_blank', 'noopener,noreferrer');
+              }}
+            >
+              <ExternalLink size={14} />
+              <span>新窗口打开</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!activeBusinessTab}
+              onSelect={() => {
+                if (activeBusinessTab) props.onMaximize(activeBusinessTab.id);
+              }}
+            >
+              <Maximize2 size={14} />
+              <span>最大化</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!activeBusinessTab}
+              onSelect={() => {
+                if (activeBusinessTab) props.onEnterImmersive(activeBusinessTab.id);
+              }}
+            >
+              <PanelsTopLeft size={14} />
+              <span>沉浸模式</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              disabled={!activeBusinessTab}
+              onSelect={() => {
+                if (activeBusinessTab) props.onClose(activeBusinessTab.id);
+              }}
+            >
+              <X size={14} />
+              <span>关闭当前</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!activeBusinessTab}
+              onSelect={() => {
+                if (activeBusinessTab) props.onCloseOthers(activeBusinessTab.id);
+              }}
+            >
+              <Copy size={14} />
+              <span>关闭其他</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem disabled={!hasBusinessTabs} onSelect={props.onCloseAll}>
+              <MoreHorizontal size={14} />
+              <span>关闭全部</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-      {contextMenu && (
-        <div
-          className="dropdown-menu tab-context-menu"
-          role="menu"
-          style={{ left: contextMenu.x, top: contextMenu.y }}
-        >
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              window.open(contextMenu.tab.url, '_blank', 'noopener,noreferrer');
-              closeContextMenu();
-            }}
-          >
-            <ExternalLink size={15} />
-            <span>新窗口打开</span>
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              props.onMaximize(contextMenu.tab.id);
-              closeContextMenu();
-            }}
-          >
-            <Maximize2 size={15} />
-            <span>最大化</span>
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              props.onClose(contextMenu.tab.id);
-              closeContextMenu();
-            }}
-          >
-            <X size={15} />
-            <span>关闭当前</span>
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              props.onCloseOthers(contextMenu.tab.id);
-              closeContextMenu();
-            }}
-          >
-            <span>关闭其他</span>
-          </button>
-          <button
-            type="button"
-            role="menuitem"
-            onClick={() => {
-              props.onCloseAll();
-              closeContextMenu();
-            }}
-          >
-            <span>关闭全部</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 }
@@ -664,13 +721,14 @@ function EmbedFrame(props: {
 }): ReactElement {
   const [loaded, setLoaded] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
+  const [frameVersion, setFrameVersion] = useState(0);
 
   useEffect(() => {
     setLoaded(false);
     setTimedOut(false);
     const timer = window.setTimeout(() => setTimedOut(true), 8000);
     return () => window.clearTimeout(timer);
-  }, [props.tab.url]);
+  }, [props.tab.url, frameVersion]);
 
   return (
     <div className="embed-shell">
@@ -685,7 +743,7 @@ function EmbedFrame(props: {
           <strong>页面可能无法加载</strong>
           <span>你可以刷新当前页、复制链接，或在新窗口打开。</span>
           <div>
-            <button onClick={() => window.location.reload()}>
+            <button onClick={() => setFrameVersion((value) => value + 1)}>
               <RefreshCw size={14} /> 刷新
             </button>
             <button onClick={() => void navigator.clipboard?.writeText(props.tab.url)}>复制链接</button>
@@ -693,18 +751,204 @@ function EmbedFrame(props: {
           </div>
         </div>
       )}
-      <iframe title={props.tab.title} src={props.tab.url} onLoad={() => setLoaded(true)} />
+      <iframe key={`${props.tab.id}:${frameVersion}`} title={props.tab.title} src={props.tab.url} onLoad={() => setLoaded(true)} />
     </div>
   );
 }
 
+type MockTableRow = {
+  id: string;
+  name: string;
+  code: string;
+  status: 'active' | 'pending' | 'risk' | 'done';
+  segment: string;
+  region: string;
+  owner: string;
+  date: string;
+  amount?: string;
+};
+
+type MockContent = {
+  appName: string;
+  title: string;
+  subtitle: string;
+  tabs: string[];
+  primaryAction: string;
+  columns: string[];
+  rows: MockTableRow[];
+};
+
+const mockContent: Record<string, MockContent> = {
+  'ops-customers': {
+    appName: '客户管理系统',
+    title: '客户视图',
+    subtitle: '统一维护客户档案、商机归属和经营状态',
+    tabs: ['客户', '商机', '合同', '设置'],
+    primaryAction: '新建客户',
+    columns: ['客户名称', '客户编码', '客户状态', '所属行业', '所属区域', '负责人', '创建时间', '操作'],
+    rows: [
+      { id: '1', name: '广州河川科技有限公司', code: 'CUS-2026-0018', status: 'active', segment: '企业服务', region: '华南一区', owner: '周晨', date: '2026-06-18' },
+      { id: '2', name: '深圳云景智造集团', code: 'CUS-2026-0017', status: 'pending', segment: '智能制造', region: '华南二区', owner: '林可', date: '2026-06-17' },
+      { id: '3', name: '上海星澜供应链', code: 'CUS-2026-0016', status: 'risk', segment: '供应链', region: '华东一区', owner: '陈越', date: '2026-06-16' },
+      { id: '4', name: '成都明岚能源科技', code: 'CUS-2026-0015', status: 'active', segment: '新能源', region: '西南区', owner: '李思', date: '2026-06-15' },
+      { id: '5', name: '北京北辰数据服务', code: 'CUS-2026-0014', status: 'done', segment: '数据服务', region: '华北区', owner: '王宁', date: '2026-06-14' }
+    ]
+  },
+  'ops-orders': {
+    appName: '订单履约中心',
+    title: '订单中心',
+    subtitle: '跟踪订单流转、交付节点和异常处理',
+    tabs: ['全部订单', '待处理', '履约中', '异常'],
+    primaryAction: '新建订单',
+    columns: ['订单名称', '订单编号', '订单状态', '业务类型', '交付区域', '负责人', '更新时间', '操作'],
+    rows: [
+      { id: '1', name: '华南门店设备更新', code: 'ORD-2026-0062', status: 'active', segment: '设备采购', region: '广州', owner: '赵一', date: '2026-06-18', amount: '¥184,000' },
+      { id: '2', name: '数据中台接口扩容', code: 'ORD-2026-0061', status: 'pending', segment: '技术服务', region: '深圳', owner: '沈洁', date: '2026-06-18', amount: '¥96,500' },
+      { id: '3', name: '客户成功续费包', code: 'ORD-2026-0060', status: 'risk', segment: '续约服务', region: '上海', owner: '刘洋', date: '2026-06-17', amount: '¥58,900' },
+      { id: '4', name: '西南渠道培训计划', code: 'ORD-2026-0059', status: 'done', segment: '培训服务', region: '成都', owner: '唐璐', date: '2026-06-16', amount: '¥31,800' }
+    ]
+  }
+};
+
+const fallbackMockContent: MockContent = {
+  appName: '业务系统',
+  title: '业务列表',
+  subtitle: '当前为设计验证 mock 页面，用于校验 Portal iframe 承载密度。',
+  tabs: ['概览', '列表', '规则', '日志'],
+  primaryAction: '新建记录',
+  columns: ['名称', '编码', '状态', '分类', '区域', '负责人', '更新时间', '操作'],
+  rows: [
+    { id: '1', name: '示例业务记录 A', code: 'REC-2026-0004', status: 'active', segment: '常规业务', region: '华南', owner: '系统用户', date: '2026-06-18' },
+    { id: '2', name: '示例业务记录 B', code: 'REC-2026-0003', status: 'pending', segment: '协作事项', region: '华东', owner: '系统用户', date: '2026-06-17' },
+    { id: '3', name: '示例业务记录 C', code: 'REC-2026-0002', status: 'done', segment: '归档数据', region: '华北', owner: '系统用户', date: '2026-06-16' }
+  ]
+};
+
 function PlaceholderPage({ menuKey }: { menuKey: string }): ReactElement {
+  const content = mockContent[menuKey] ?? { ...fallbackMockContent, title: menuKey };
+
   return (
-    <div className="placeholder-page">
-      <div>
-        <p>Base Portal 占位页</p>
-        <h1>{menuKey}</h1>
-      </div>
-    </div>
+    <main className="mock-app">
+      <header className="mock-topbar">
+        <div className="mock-brand">
+          <span className="mock-logo">{content.appName.slice(0, 2)}</span>
+          <span>{content.appName}</span>
+        </div>
+        <div className="mock-global-actions">
+          <button type="button" aria-label="筛选">
+            <SlidersHorizontal size={14} />
+          </button>
+          <button type="button" aria-label="刷新">
+            <RefreshCw size={14} />
+          </button>
+          <span className="mock-avatar">ZW</span>
+        </div>
+      </header>
+      <section className="mock-page">
+        <div className="mock-page-heading">
+          <div>
+            <p>运营中心 / {content.appName}</p>
+            <h1>{content.title}</h1>
+            <span>{content.subtitle}</span>
+          </div>
+          <button className="mock-primary" type="button">
+            <Plus size={14} />
+            <span>{content.primaryAction}</span>
+          </button>
+        </div>
+        <nav className="mock-tabs" aria-label="业务系统标签">
+          {content.tabs.map((tab, index) => (
+            <button key={tab} className={index === 0 ? 'active' : ''} type="button">
+              {tab}
+            </button>
+          ))}
+        </nav>
+        <div className="mock-filters">
+          <label>
+            <span>关键词</span>
+            <input value="" placeholder="搜索名称 / 编码" readOnly />
+          </label>
+          <label>
+            <span>状态</span>
+            <select value="all" aria-label="状态" onChange={() => undefined}>
+              <option value="all">全部状态</option>
+            </select>
+          </label>
+          <label>
+            <span>区域</span>
+            <select value="all" aria-label="区域" onChange={() => undefined}>
+              <option value="all">全部区域</option>
+            </select>
+          </label>
+          <button type="button">查询</button>
+          <button type="button">重置</button>
+        </div>
+        <section className="mock-table-card" aria-label={content.title}>
+          <div className="mock-table-toolbar">
+            <strong>数据列表</strong>
+            <div>
+              <button type="button">导入</button>
+              <button type="button">导出</button>
+              <button type="button" aria-label="更多">
+                <MoreHorizontal size={14} />
+              </button>
+            </div>
+          </div>
+          <table className="mock-table">
+            <thead>
+              <tr>
+                {content.columns.map((column) => (
+                  <th key={column}>{column}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {content.rows.map((row) => (
+                <tr key={row.id}>
+                  <td>
+                    <strong>{row.name}</strong>
+                    {row.amount && <small>{row.amount}</small>}
+                  </td>
+                  <td>{row.code}</td>
+                  <td><MockStatus status={row.status} /></td>
+                  <td>{row.segment}</td>
+                  <td>{row.region}</td>
+                  <td>{row.owner}</td>
+                  <td>{row.date}</td>
+                  <td>
+                    <button type="button">查看</button>
+                    <button type="button">编辑</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="mock-pagination">
+            <span>共 128 条</span>
+            <button type="button">上一页</button>
+            <button className="active" type="button">1</button>
+            <button type="button">2</button>
+            <button type="button">3</button>
+            <button type="button">下一页</button>
+          </div>
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function MockStatus({ status }: { status: MockTableRow['status'] }): ReactElement {
+  const label = {
+    active: '进行中',
+    pending: '待确认',
+    risk: '有风险',
+    done: '已完成'
+  }[status];
+
+  return (
+    <span className={`mock-status ${status}`}>
+      <CheckCircle2 size={12} />
+      {label}
+    </span>
   );
 }
