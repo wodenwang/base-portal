@@ -133,7 +133,7 @@ Result: `apps/portal-web/dist/favicon.svg` exists after `pnpm build`, and `dist/
 
 ### Task 5: Ship and deploy
 
-- [ ] **Step 1: commit and push v0.1.1**
+- [x] **Step 1: commit and push v0.1.1**
 
 Expected:
 
@@ -141,15 +141,16 @@ Expected:
 - `v0.1.1` tag exists and points to the release commit.
 - GitHub release `v0.1.1` exists.
 
-- [ ] **Step 2: build/load production image and run upgrade**
+- [x] **Step 2: build/load production image and run upgrade**
 
 Expected:
 
 - 92 server has `base-portal-release:v0.1.1`.
-- `./upgrade.sh --from v0.1.0 --to v0.1.1 --image base-portal-release:v0.1.1 --pull never` completes.
+- `./upgrade.sh --from v0.1.0 --to v0.1.1 --image base-portal-release:v0.1.1 --pull never` completed.
+- `./upgrade.sh --from v0.1.1 --to v0.1.1 --image base-portal-release:v0.1.1 --pull never --force` completed after GIT_COMMIT propagation was fixed.
 - Remote `.deploy/version` reads `v0.1.1`.
 
-- [ ] **Step 3: verify production**
+- [x] **Step 3: verify production**
 
 Expected:
 
@@ -170,10 +171,10 @@ Expected:
 | 6 | Writing plan | complete | `IMPLEMENTATION_PLAN.md` |
 | 7 | Executing plan | complete | Deployment hardening edits |
 | 8 | Verification before completion | complete | Local command evidence above |
-| 9 | Browser verification | in_progress | Built favicon artifact verified; production browser smoke pending |
+| 9 | Browser verification | complete | Built favicon artifact and production browser smoke verified |
 | 10 | Visual QA | skipped | No visual layout change |
-| 11 | Functional QA | pending | Health/version/API smoke |
-| 12 | Review | pending | Diff review before ship |
-| 13 | Git closeout | pending | `git status`, staged diff |
-| 14 | Ship | pending | Commit, tag, GitHub release |
-| 15 | Land and deploy | pending | Production upgrade and health checks |
+| 11 | Functional QA | complete | Health/version/API smoke |
+| 12 | Review | complete | Diff review before ship |
+| 13 | Git closeout | complete | `git status`, staged diff |
+| 14 | Ship | complete | Commit, tag, GitHub release |
+| 15 | Land and deploy | complete | Production upgrade and health checks |

@@ -1,6 +1,6 @@
 # Base Portal v0.1.1 发布记录
 
-状态：LOCAL_VERIFIED_AWAITING_SHIP_AND_DEPLOY
+状态：RELEASED_AND_DEPLOYED
 日期：2026-06-19
 
 ## 范围
@@ -46,13 +46,18 @@ git diff --check
 
 ## 发布和部署
 
-待补：
+- tag：`v0.1.1`
+- GitHub Release：`v0.1.1`
+- 远端：`bpmt@120.24.236.92:/home/bpmt/base-portal`
+- 远端 image：`base-portal-release:v0.1.1`
+- 远端 image id：`sha256:2a34dff5b0ddbd987d4e41cb5922252fae74d89c3d54055dcb1bf90aacb98fd8`
+- 远端 `.deploy/version`：`v0.1.1`
+- 生产 `/health`：`200 {"status":"ok"}`
+- 生产 `/ready`：`200 {"status":"ready","checks":{"database":"ok"}}`
+- 生产 `/version`：`version=0.1.1`，commit 由最终 release tag 和线上读回校验。
+- 生产 `/favicon.svg`：`200 image/svg+xml`
+- Playwright：登录页渲染通过，console error 0，截图见 `output/playwright/base-portal-v0.1.1-production-login.png`。
 
-- release commit
-- tag `v0.1.1`
-- GitHub Release URL
-- 远端 image id
-- `.deploy/version`
-- `/health`
-- `/ready`
-- `/version`
+## Secret 边界
+
+未读取、未回显、未提交真实 `deploy/.env`、IAM secret、developer API token、数据库密码、阿里云凭证或证书私钥。
