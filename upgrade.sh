@@ -137,6 +137,7 @@ chmod 600 "backups/.env.${CURRENT_VERSION}.to.${TARGET_VERSION}.${BACKUP_SUFFIX}
 missing_keys=()
 while IFS='=' read -r key _; do
   [[ -z "$key" || "$key" == \#* ]] && continue
+  [[ "$key" == "BASE_PORTAL_PULL_POLICY" ]] && continue
   if ! grep -q "^${key}=" deploy/.env; then
     missing_keys+=("$key")
   fi

@@ -84,6 +84,7 @@ Expected behavior:
 - `never` skips all pulls and runs `docker compose up -d --no-build --pull never`.
 - `always` preserves the explicit pull behavior.
 - Scripts still reject `latest`, missing images, unsafe env, and placeholder secrets.
+- Existing production `.env` files are not blocked for missing optional `BASE_PORTAL_PULL_POLICY`; the script argument or process env supplies the value.
 
 ### Task 3: Build image base hardening
 
