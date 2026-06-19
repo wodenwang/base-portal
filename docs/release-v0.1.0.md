@@ -1,6 +1,6 @@
 # Base Portal v0.1.0 发布记录
 
-状态：NGINX_CONFIGURED_AWAITING_PRODUCTION_ENV
+状态：RELEASE_READY_AWAITING_PRODUCTION_ENV
 日期：2026-06-19
 
 ## 范围
@@ -15,9 +15,9 @@ v0.1.0 包含：
 
 ## 本地验证
 
-本地提交：
+实现提交：
 
-- `git rev-parse HEAD`
+- `5d5d91e82344291741b249bf9cf784029af78f58`
 
 已通过：
 
@@ -44,12 +44,13 @@ git diff --check
 - `releases/v0.1.0`、`deploy/docker-compose.yml`、`deploy/.env.example` 已同步到远端。
 - 远端 `deploy/.env` 模板已创建，内容未读取、未回显。
 - `install.sh` 已验证会在启动前拦截当前模板配置，仅输出问题 key，不输出值。
-- 生产镜像 `base-portal-release:v0.1.0` 已加载到 92 服务器，远端 image id 前缀为 `sha256:33c4ab`。
+- 生产镜像 `base-portal-release:v0.1.0` 已重新构建并加载到 92 服务器，远端 image id 为 `sha256:048214ab69a7f65198e2124a667c43057cb78c69884cc98330795c54f644089d`。
 - 远端尚无 `.deploy/version`，服务未启动。
 - 92 服务器 `~/nginx/nginx.conf` 已写入 base-portal managed block，并通过 `docker exec system-nginx nginx -t`。
 - 92 服务器 `system-nginx` 已重建并运行。
 - 现有 `riversoft.com.cn` / `*.riversoft.com.cn` 通配符证书覆盖 `base-portal.riversoft.com.cn`，有效期至 2026-08-27。
 - `https://base-portal.riversoft.com.cn/health` 当前 TLS 校验通过，但返回 `502`，因为应用容器尚未启动。
+- 公共 DNS 解析器 `223.5.5.5` 和 `8.8.8.8` 当前均读回 `120.24.236.92`。
 
 浏览器截图和 QA 证据见：
 
@@ -80,6 +81,13 @@ git diff --check
 - 在 92 服务器 `/home/bpmt/base-portal` 启动 Docker Compose 服务并写入 `.deploy/version`。
 - 读回 `.deploy/version`。
 - 验证 `https://base-portal.riversoft.com.cn/health` 和 `/ready`。
+
+当前远端 env gate 只输出 key 状态，不输出值：
+
+- `POSTGRES_PASSWORD=placeholder`
+- `DATABASE_URL=placeholder`
+- `FEISHU_IAM_CLIENT_SECRET=empty`
+- `FEISHU_IAM_DEVELOPER_API_TOKEN=empty`
 
 ## Secret 边界
 
