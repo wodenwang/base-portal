@@ -1,6 +1,6 @@
 # Base Portal v0.1.2 发布记录
 
-状态：`LOCAL_VERIFIED_READY_FOR_SHIP`
+状态：`COMPLETE`
 
 ## 范围
 
@@ -47,8 +47,11 @@ git diff --check
 
 ## 发布状态
 
-- Commit：pending
-- Tag：pending
-- GitHub Release：pending
-- 远端部署：pending
-- 线上 `/version`：pending
+- GitHub Release：`https://github.com/wodenwang/base-portal/releases/tag/v0.1.2`
+- 远端 image：`base-portal-release:v0.1.2`
+- 远端 image id：`sha256:b7706779de49c974169c355a36fcf0137f7d3db4bb0fa29f22134b03575d0ed1`
+- 远端 `.deploy/version`：`v0.1.2`
+- 线上 `/health`：`{"status":"ok"}`
+- 线上 `/ready`：`{"status":"ready","checks":{"database":"ok"}}`
+- 线上 `/version`：`version=0.1.2`，commit 由最终 release tag 和线上读回校验。
+- 生产 Playwright：登录页渲染通过，console error 0，截图见 `output/playwright/base-portal-v0.1.2-production-login.png`。

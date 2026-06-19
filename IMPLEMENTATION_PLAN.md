@@ -170,7 +170,7 @@ Expected evidence:
 - Tablet 834x1112: collapsed/sidebar behavior does not overlap workspace.
 - Mobile 390x844: no touch drag requirement; menu fallback and layout remain usable.
 
-- [ ] **Step 2: complete review and release**
+- [x] **Step 2: complete review and release**
 
 Expected:
 
@@ -179,7 +179,7 @@ Expected:
 - Tag `v0.1.2` exists and points to the release commit.
 - GitHub Release `v0.1.2` exists.
 
-- [ ] **Step 3: deploy and verify production**
+- [x] **Step 3: deploy and verify production**
 
 Expected:
 
@@ -206,6 +206,6 @@ Expected:
 | 10 | Visual QA | complete | Desktop flyout and tablet/mobile regression screenshots reviewed |
 | 11 | Functional QA | complete | Local mock-auth shell, drag reorder, menu fallback, `/health`, `/ready`, `/version` |
 | 12 | Review | complete | `docs/reviews/2026-06-19-v0.1.2-pre-landing-review.md` |
-| 13 | Git closeout | pending | Commit/tag/release prep |
-| 14 | Ship | pending | GitHub release |
-| 15 | Land and deploy | pending | Production upgrade and online readback |
+| 13 | Git closeout | complete | Commit pushed, final closeout retag follows production evidence |
+| 14 | Ship | complete | GitHub Release `v0.1.2` |
+| 15 | Land and deploy | complete | Production `/version` reads `0.1.2`; final commit verified by tag/readback |
