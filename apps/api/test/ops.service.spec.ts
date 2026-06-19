@@ -35,6 +35,20 @@ describe('OpsService app package import', () => {
     });
   });
 
+  it('rejects unknown menu open modes with a safe validation error', async () => {
+    const invalid = clonePackage();
+    invalid.menus[1].openMode = 'popup' as never;
+
+    await expect(service.importAppPackage(session, invalid, { dryRun: true })).rejects.toMatchObject({
+      response: expect.objectContaining({
+        error: expect.objectContaining({
+          code: 'APP_PACKAGE_INVALID',
+          details: expect.arrayContaining(['invalid openMode: demo-embedded'])
+        })
+      })
+    });
+  });
+
   it('summarizes dry-run import without writing domain or menus', async () => {
     const result = await service.importAppPackage(session, clonePackage(), { dryRun: true });
 
@@ -53,6 +67,26 @@ describe('OpsService app package import', () => {
     expect(fakePrisma.portalDomain.upsert).not.toHaveBeenCalled();
     expect(fakePrisma.portalMenu.upsert).not.toHaveBeenCalled();
     expect(audit.record).not.toHaveBeenCalled();
+  });
+
+  it('warns and normalizes historical immersive iframe open modes on import', async () => {
+    const appPackage = clonePackage();
+    appPackage.menus[1].openMode = 'immersive_iframe';
+
+    const dryRun = await service.importAppPackage(session, appPackage, { dryRun: true });
+    await service.importAppPackage(session, appPackage, { dryRun: false });
+
+    expect(dryRun.summary.warnings).toEqual(['menu demo-embedded openMode immersive_iframe normalized to iframe']);
+    expect(fakePrisma.portalMenu.upsert).toHaveBeenCalledWith(expect.objectContaining({
+      create: expect.objectContaining({
+        key: 'demo-embedded',
+        openMode: 'iframe'
+      }),
+      update: expect.objectContaining({
+        openMode: 'iframe'
+      })
+    }));
+    expect(JSON.stringify(dryRun)).not.toContain('unit-test-placeholder');
   });
 
   it('applies the same package twice as idempotent upserts', async () => {
@@ -245,12 +279,12 @@ function jsonResponse(body: unknown, status = 200): Response {
 
 const packageFixture: PortalAppPackage = {
   packageKey: 'base-portal.demo',
-  version: '2026-06-19',
+  version: '2026-06-20',
   domain: {
     id: 'domain-demo-services',
     key: 'demo-services',
     name: '示例接入',
-    description: '用于验证 v0.2.0 第三方应用接入包、权限同步和真实用户路径。',
+    description: '用于验证 v0.3.0 第三方应用无感接入、权限同步和真实用户路径。',
     icon: 'Workflow',
     coverColor: '#0f766e',
     sortOrder: 90,
@@ -271,14 +305,14 @@ const packageFixture: PortalAppPackage = {
       id: 'menu-demo-embedded',
       parentId: 'menu-demo-root',
       key: 'demo-embedded',
-      title: '内嵌入口',
+      title: 'SSO Demo',
       icon: 'PanelsTopLeft',
       level: 2,
       sortOrder: 10,
       status: 'active',
       isLeaf: true,
       resourceKey: 'base-portal.demo.embedded',
-      url: '/placeholder/demo-embedded',
+      url: 'https://feishu-iam-sso-demo.riversoft.com.cn/',
       openMode: 'iframe',
       confirmOnClose: false
     },
@@ -286,14 +320,14 @@ const packageFixture: PortalAppPackage = {
       id: 'menu-demo-new-tab',
       parentId: 'menu-demo-root',
       key: 'demo-new-tab',
-      title: '新窗口入口',
+      title: '新窗口恢复入口',
       icon: 'ExternalLink',
       level: 2,
       sortOrder: 20,
       status: 'active',
       isLeaf: true,
       resourceKey: 'base-portal.demo.new-tab',
-      url: '/placeholder/demo-new-tab',
+      url: 'https://feishu-iam-sso-demo.riversoft.com.cn/',
       openMode: 'new_tab',
       confirmOnClose: false
     }
@@ -302,7 +336,7 @@ const packageFixture: PortalAppPackage = {
     {
       key: 'base-portal.demo.users',
       name: 'Base Portal 示例接入用户',
-      description: '允许访问 v0.2.0 示例第三方应用接入包。',
+      description: '允许访问 v0.3.0 示例第三方应用接入包。',
       points: ['base-portal.demo.embedded', 'base-portal.demo.new-tab']
     }
   ]

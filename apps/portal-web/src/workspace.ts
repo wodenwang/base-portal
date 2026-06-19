@@ -55,6 +55,7 @@ export function openMenuTab(
     title: menu.title,
     url: menu.url,
     openMode: 'iframe',
+    refreshKey: 0,
     confirmOnClose: menu.confirmOnClose
   };
   return {
@@ -129,19 +130,11 @@ export function hasConfirmTabs(tabs: WorkspaceTab[]): boolean {
   return tabs.some((tab) => tab.confirmOnClose);
 }
 
-export function exitImmersiveTab(state: WorkspaceState, tabId: string): WorkspaceState {
+export function refreshTabFrame(state: WorkspaceState, tabId: string): WorkspaceState {
+  const tab = state.tabs.find((item) => item.id === tabId);
+  if (!tab) return state;
   return {
     ...state,
-    tabs: state.tabs.map((tab) => (tab.id === tabId ? { ...tab, openMode: 'iframe' } : tab)),
-    maximized: false
-  };
-}
-
-export function enterImmersiveTab(state: WorkspaceState, tabId: string): WorkspaceState {
-  return {
-    ...state,
-    activeTabId: tabId,
-    tabs: state.tabs.map((tab) => (tab.id === tabId ? { ...tab, openMode: 'immersive_iframe' } : tab)),
-    maximized: false
+    tabs: state.tabs.map((item) => (item.id === tabId ? { ...item, refreshKey: item.refreshKey + 1 } : item))
   };
 }

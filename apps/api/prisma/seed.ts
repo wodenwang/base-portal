@@ -55,7 +55,7 @@ const menus = [
     isLeaf: true,
     resourceKey: 'base-portal.ops.customers',
     url: '/placeholder/ops-customers',
-    openMode: 'immersive_iframe',
+    openMode: 'iframe',
     confirmOnClose: true
   },
   {

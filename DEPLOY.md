@@ -1,7 +1,7 @@
 # Base Portal 部署与升级规范
 
 状态：DEPLOYMENT_BASELINE
-适用版本：v0.2.0
+适用版本：v0.3.0
 生产域名：`https://base-portal.riversoft.com.cn`
 生产服务器：`bpmt@120.24.236.92:/home/bpmt/base-portal`
 服务器 nginx 目录：`bpmt@120.24.236.92:~/nginx`
@@ -11,9 +11,9 @@
 ## 1. 核心原则
 
 - 项目开发过程中和最终部署过程中，必须严格执行本文件。
-- v0.2.0 的交付范围是在 v0.1.2 生产基线上完成真实 Feishu IAM 验收、一个第三方应用接入包、文件导入 + ops API、IAM permission point/group/binding dry-run/apply、权限过滤、审计和生产部署读回。
+- v0.3.0 的交付范围是在 v0.2.0 生产基线上完成 SSO Demo 第三方无感接入体验、移除沉浸模式、Tab 刷新当前 iframe、兼容历史 `immersive_iframe` 数据降级和生产部署读回。
 - 正式部署以版本为最小管理颗粒度。
-- 生产发布物是版本化 Docker image，tag 必须与 release 版本一致，例如 `v0.2.0`。
+- 生产发布物是版本化 Docker image，tag 必须与 release 版本一致，例如 `v0.3.0`。
 - 生产运行形态是 Docker Compose。
 - `install.sh` 只负责首次初始化安装。
 - `upgrade.sh` 只负责已安装版本到目标版本的升级。
@@ -52,7 +52,7 @@ Alibaba Cloud DNS A record
 需要区分以下概念：
 
 - 当前安装版本：从 `.deploy/version` 读取。
-- 目标版本：本次安装或升级要达到的 release 版本，例如 `v0.2.0`。
+- 目标版本：本次安装或升级要达到的 release 版本，例如 `v0.3.0`。
 - 镜像版本：与 release 版本一致的 Docker image tag。
 - Compose 版本：目标 release 携带的 `deploy/docker-compose.yml` 和 `deploy/.env.example`。
 - DB 版本：Prisma migration 成功应用后的数据库版本。
@@ -61,8 +61,8 @@ Alibaba Cloud DNS A record
 当前版本的镜像地址必须落为显式变量，例如：
 
 ```text
-BASE_PORTAL_IMAGE=<registry>/base-portal:v0.2.0
-BASE_PORTAL_VERSION=v0.2.0
+BASE_PORTAL_IMAGE=<registry>/base-portal:v0.3.0
+BASE_PORTAL_VERSION=v0.3.0
 ```
 
 生产 Compose 必须使用 `image: ${BASE_PORTAL_IMAGE:?BASE_PORTAL_IMAGE is required}` 或等价固定版本镜像，不得只依赖 `build:`。
@@ -88,7 +88,7 @@ BASE_PORTAL_VERSION=v0.2.0
   data/
     postgres/
   releases/
-    v0.2.0/
+    v0.3.0/
   backups/
 ```
 
@@ -100,7 +100,7 @@ BASE_PORTAL_VERSION=v0.2.0
 
 `install.sh` 必须：
 
-1. 默认目标版本为当前仓库版本 `v0.2.0`，也允许显式传入 `--version v0.2.0`。
+1. 默认目标版本为当前仓库版本 `v0.3.0`，也允许显式传入 `--version v0.3.0`。
 2. 检查 `.deploy/version` 是否已经存在；默认拒绝重复初始化。
 3. 检查 `docker`、`docker compose`、`ssh`、`tar` 或等价部署依赖。
 4. 校验生产镜像 tag 是明确版本，不是 `latest`。
@@ -238,11 +238,13 @@ curl -fsS https://base-portal.riversoft.com.cn/ready
 
 前端验收还必须保留 Playwright 或等价浏览器证据，覆盖桌面、平板、手机视口。
 
-v0.2.0 还必须额外保留以下脱敏证据：
+v0.3.0 还必须额外保留以下脱敏证据：
 
 - `POST /api/ops/import-app-package` dry-run 和 apply 响应摘要。
 - `POST /api/ops/sync-iam-resources` dry-run 和 apply 响应摘要，覆盖 permission points、permission groups 和 group bindings。
 - 真实 Feishu IAM 登录回调、`/oauth/userinfo`、`/api/v1/apps/base-portal/me/permissions` 的成功读回摘要。
+- SSO Demo 菜单内嵌入口、fallback 和新窗口恢复路径的脱敏浏览器验证摘要。
+- 历史 `openMode=immersive_iframe` 接入包 import 降级为 `iframe` 的 warning 摘要。
 - 无权限、部分权限、完整权限三种导航过滤结果。
 - `app_package_import` 和 `iam_resource_sync` 审计事件存在性，审计详情不得包含 secret 或远端原始响应体。
 
@@ -260,6 +262,6 @@ v0.2.0 还必须额外保留以下脱敏证据：
 - 证书颁发和有效期读回。
 - nginx 反向代理配置读回。
 - `/health`、`/ready`、首页和登录入口的生产 URL 验证结果。
-- v0.2.0 真实 IAM 验收、接入包导入、IAM sync 和权限过滤的脱敏验证证据。
+- v0.3.0 SSO Demo 菜单、iframe refresh、接入包导入、IAM sync 和权限过滤的脱敏验证证据。
 
 缺少任一项，只能说“本地实现完成”或“部署部分完成”，不得说当前版本已完整交付。

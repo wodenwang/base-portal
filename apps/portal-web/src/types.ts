@@ -11,6 +11,7 @@ export type SessionResponse = {
 };
 
 export type OpenMode = 'iframe' | 'immersive_iframe' | 'new_tab';
+export type WorkspaceOpenMode = 'iframe';
 
 export type NavigationMenu = {
   id: string;
@@ -47,6 +48,7 @@ export type WorkspaceTab = {
   domainName: string;
   title: string;
   url: string;
-  openMode: Exclude<OpenMode, 'new_tab'>;
+  openMode: WorkspaceOpenMode;
+  refreshKey: number;
   confirmOnClose: boolean;
 };

@@ -97,6 +97,7 @@ export class OpsService {
 
   async importAppPackage(session: PortalSession, appPackage: PortalAppPackage, options: ImportOptions): Promise<ImportResult> {
     validateAppPackage(appPackage);
+    const warnings = openModeNormalizationWarnings(appPackage);
     const existingDomain = await this.prisma.portalDomain.findUnique({ where: { key: appPackage.domain.key } });
     const existingMenus = await this.prisma.portalMenu.findMany({ where: { domainId: appPackage.domain.id } });
     const existingMenusByKey = new Map(existingMenus.map((menu) => [menu.key, menu]));
@@ -112,7 +113,7 @@ export class OpsService {
       permissionPoints: leafPermissionKeys(appPackage).length,
       permissionGroups: appPackage.permissionGroups?.length ?? 0,
       bindings: appPackage.permissionGroups?.reduce((total, group) => total + group.points.length, 0) ?? 0,
-      warnings: []
+      warnings
     };
 
     if (!options.dryRun) {
@@ -154,7 +155,7 @@ export class OpsService {
             isLeaf: menu.isLeaf,
             resourceKey: menu.resourceKey ?? null,
             url: menu.url ?? null,
-            openMode: menu.openMode ?? null,
+            openMode: normalizeImportOpenMode(menu.openMode),
             confirmOnClose: menu.confirmOnClose ?? false
           },
           update: {
@@ -168,7 +169,7 @@ export class OpsService {
             isLeaf: menu.isLeaf,
             resourceKey: menu.resourceKey ?? null,
             url: menu.url ?? null,
-            openMode: menu.openMode ?? null,
+            openMode: normalizeImportOpenMode(menu.openMode),
             confirmOnClose: menu.confirmOnClose ?? false
           }
         });
@@ -388,6 +389,9 @@ export function validateAppPackage(appPackage: PortalAppPackage): void {
     if (menu.parentId && !menuIds.has(menu.parentId) && !menus.some((candidate) => candidate.id === menu.parentId)) {
       errors.push(`unknown parentId: ${menu.parentId}`);
     }
+    if (menu.openMode !== undefined && !['iframe', 'immersive_iframe', 'new_tab'].includes(String(menu.openMode))) {
+      errors.push(`invalid openMode: ${menu.key}`);
+    }
     if (menu.isLeaf) {
       if (!menu.resourceKey || !menu.url) errors.push(`leaf menu requires resourceKey and url: ${menu.key}`);
       if (!menu.resourceKey?.startsWith('base-portal.')) errors.push(`leaf resourceKey must start with base-portal.: ${menu.key}`);
@@ -428,6 +432,18 @@ function leafPermissionKeys(appPackage: PortalAppPackage): string[] {
 
 function isPermissionMenu(menu: PortalAppPackage['menus'][number]): menu is PortalAppPackage['menus'][number] & { resourceKey: string } {
   return menu.isLeaf && typeof menu.resourceKey === 'string';
+}
+
+function normalizeImportOpenMode(openMode: PortalAppPackage['menus'][number]['openMode']): PortalAppPackage['menus'][number]['openMode'] | null {
+  if (!openMode) return null;
+  if (openMode === 'immersive_iframe') return 'iframe';
+  return openMode;
+}
+
+function openModeNormalizationWarnings(appPackage: PortalAppPackage): string[] {
+  return appPackage.menus
+    .filter((menu) => menu.openMode === 'immersive_iframe')
+    .map((menu) => `menu ${menu.key} openMode immersive_iframe normalized to iframe`);
 }
 
 function requiredEnv(name: string): string {

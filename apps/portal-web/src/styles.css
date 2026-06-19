@@ -937,7 +937,6 @@ a:focus-visible {
   white-space: nowrap;
 }
 
-.immersive .body,
 .maximized .body {
   grid-template-columns: 1fr;
 }

@@ -67,10 +67,9 @@ import {
   closeTab,
   createHomeTabId,
   createInitialWorkspace,
-  enterImmersiveTab,
-  exitImmersiveTab,
   hasConfirmTabs,
   openMenuTab,
+  refreshTabFrame,
   reorderTabs,
   switchDomain,
   type WorkspaceState
@@ -146,7 +145,6 @@ export function App(): ReactElement {
   const activeBusinessTab = workspace?.tabs.find((tab) => tab.id === workspace.activeTabId) ?? null;
   const activeMenuId = activeBusinessTab?.menuId ?? null;
   const isHomeActive = workspace ? workspace.activeTabId === createHomeTabId(workspace.activeDomainKey) : false;
-  const isImmersive = activeBusinessTab?.openMode === 'immersive_iframe';
   const isMaximized = workspace?.maximized ?? false;
 
   if (loading) return <LoadingScreen />;
@@ -231,6 +229,10 @@ export function App(): ReactElement {
     setWorkspace({ ...requireWorkspace(), activeTabId: tabId, maximized: true });
   }
 
+  function handleRefreshTab(tabId: string): void {
+    setWorkspace(refreshTabFrame(requireWorkspace(), tabId));
+  }
+
   async function handleLogout(): Promise<void> {
     await logout();
     window.location.href = '/';
@@ -239,7 +241,6 @@ export function App(): ReactElement {
   const shellClass = [
     'app-shell',
     sidebarCollapsed ? 'sidebar-collapsed' : '',
-    isImmersive ? 'immersive' : '',
     isMaximized ? 'maximized' : ''
   ].join(' ');
 
@@ -254,7 +255,7 @@ export function App(): ReactElement {
             <BrandMark />
             <span>Base Portal</span>
           </div>
-          {!isImmersive && <DomainNav domains={domains} activeKey={activeDomain.key} onSwitch={handleDomainSwitch} />}
+          <DomainNav domains={domains} activeKey={activeDomain.key} onSwitch={handleDomainSwitch} />
           <div className="user-area">
             <div className="topbar-tools" aria-label="门户工具">
               <button className="icon-button" type="button" aria-label="搜索" title="搜索">
@@ -273,7 +274,7 @@ export function App(): ReactElement {
       )}
 
       <section className="body">
-        {!isImmersive && !isMaximized && (
+        {!isMaximized && (
           <aside className={`sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
             <div className="sidebar-header">
               <span>{sidebarCollapsed ? '菜单' : activeDomain.name}</span>
@@ -312,14 +313,8 @@ export function App(): ReactElement {
               onCloseOthers={handleCloseOthers}
               onReorder={handleReorderTabs}
               onMove={handleMoveTab}
-              onEnterImmersive={(tabId) => setWorkspace(enterImmersiveTab(workspace, tabId))}
+              onRefresh={handleRefreshTab}
               onMaximize={handleMaximizeTab}
-              onExitImmersive={() => {
-                if (activeBusinessTab) {
-                  setWorkspace(exitImmersiveTab(workspace, activeBusinessTab.id));
-                }
-              }}
-              immersive={isImmersive}
             />
           )}
           <div className="workspace-content">
@@ -329,6 +324,7 @@ export function App(): ReactElement {
               <EmbedFrame
                 tab={activeBusinessTab}
                 maximized={isMaximized}
+                onRefresh={() => handleRefreshTab(activeBusinessTab.id)}
                 onExitMaximize={() => setWorkspace({ ...workspace, maximized: false })}
               />
             ) : (
@@ -628,10 +624,8 @@ function TabStrip(props: {
   onCloseOthers: (tabId?: string) => void;
   onReorder: (sourceTabId: string, targetTabId: string, placement: 'before' | 'after') => void;
   onMove: (tabId: string, direction: 'left' | 'right') => void;
-  onEnterImmersive: (tabId: string) => void;
+  onRefresh: (tabId: string) => void;
   onMaximize: (tabId: string) => void;
-  onExitImmersive: () => void;
-  immersive: boolean;
 }): ReactElement {
   const homeId = createHomeTabId(props.domain.key);
   const activeBusinessTab = props.workspace.tabs.find((tab) => tab.id === props.workspace.activeTabId) ?? null;
@@ -720,13 +714,13 @@ function TabStrip(props: {
                 <ExternalLink size={14} />
                 <span>新窗口打开</span>
               </ContextMenuItem>
+              <ContextMenuItem onSelect={() => props.onRefresh(tab.id)}>
+                <RefreshCw size={14} />
+                <span>刷新当前 iframe</span>
+              </ContextMenuItem>
               <ContextMenuItem onSelect={() => props.onMaximize(tab.id)}>
                 <Maximize2 size={14} />
                 <span>最大化</span>
-              </ContextMenuItem>
-              <ContextMenuItem onSelect={() => props.onEnterImmersive(tab.id)}>
-                <PanelsTopLeft size={14} />
-                <span>沉浸模式</span>
               </ContextMenuItem>
               <ContextMenuSeparator />
               <ContextMenuItem disabled={index === 0} onSelect={() => props.onMove(tab.id, 'left')}>
@@ -755,7 +749,6 @@ function TabStrip(props: {
         ))}
       </div>
       <div className="tab-actions">
-        {props.immersive && <button onClick={props.onExitImmersive}>退出沉浸</button>}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="icon-button" type="button" aria-label="标签操作" title="标签操作">
@@ -775,20 +768,20 @@ function TabStrip(props: {
             <DropdownMenuItem
               disabled={!activeBusinessTab}
               onSelect={() => {
+                if (activeBusinessTab) props.onRefresh(activeBusinessTab.id);
+              }}
+            >
+              <RefreshCw size={14} />
+              <span>刷新当前 iframe</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!activeBusinessTab}
+              onSelect={() => {
                 if (activeBusinessTab) props.onMaximize(activeBusinessTab.id);
               }}
             >
               <Maximize2 size={14} />
               <span>最大化</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              disabled={!activeBusinessTab}
-              onSelect={() => {
-                if (activeBusinessTab) props.onEnterImmersive(activeBusinessTab.id);
-              }}
-            >
-              <PanelsTopLeft size={14} />
-              <span>沉浸模式</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -858,18 +851,18 @@ function DomainHome({ domain }: { domain: NavigationDomain }): ReactElement {
 function EmbedFrame(props: {
   tab: WorkspaceTab;
   maximized: boolean;
+  onRefresh: () => void;
   onExitMaximize: () => void;
 }): ReactElement {
   const [loaded, setLoaded] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
-  const [frameVersion, setFrameVersion] = useState(0);
 
   useEffect(() => {
     setLoaded(false);
     setTimedOut(false);
     const timer = window.setTimeout(() => setTimedOut(true), 8000);
     return () => window.clearTimeout(timer);
-  }, [props.tab.url, frameVersion]);
+  }, [props.tab.url, props.tab.refreshKey]);
 
   return (
     <div className="embed-shell">
@@ -884,7 +877,7 @@ function EmbedFrame(props: {
           <strong>页面可能无法加载</strong>
           <span>你可以刷新当前页、复制链接，或在新窗口打开。</span>
           <div>
-            <button onClick={() => setFrameVersion((value) => value + 1)}>
+            <button onClick={props.onRefresh}>
               <RefreshCw size={14} /> 刷新
             </button>
             <button onClick={() => void navigator.clipboard?.writeText(props.tab.url)}>复制链接</button>
@@ -892,7 +885,7 @@ function EmbedFrame(props: {
           </div>
         </div>
       )}
-      <iframe key={`${props.tab.id}:${frameVersion}`} title={props.tab.title} src={props.tab.url} onLoad={() => setLoaded(true)} />
+      <iframe key={`${props.tab.id}:${props.tab.refreshKey}`} title={props.tab.title} src={props.tab.url} onLoad={() => setLoaded(true)} />
     </div>
   );
 }

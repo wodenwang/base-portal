@@ -1,11 +1,11 @@
 {
   "packageKey": "base-portal.demo",
-  "version": "2026-06-19",
+  "version": "2026-06-20",
   "domain": {
     "id": "domain-demo-services",
     "key": "demo-services",
     "name": "示例接入",
-    "description": "用于验证 v0.2.0 第三方应用接入包、权限同步和真实用户路径。",
+    "description": "用于验证 v0.3.0 第三方应用无感接入、权限同步和真实用户路径。",
     "icon": "Workflow",
     "coverColor": "#0f766e",
     "sortOrder": 90,
@@ -26,14 +26,14 @@
       "id": "menu-demo-embedded",
       "parentId": "menu-demo-root",
       "key": "demo-embedded",
-      "title": "内嵌入口",
+      "title": "SSO Demo",
       "icon": "PanelsTopLeft",
       "level": 2,
       "sortOrder": 10,
       "status": "active",
       "isLeaf": true,
       "resourceKey": "base-portal.demo.embedded",
-      "url": "/placeholder/demo-embedded",
+      "url": "https://feishu-iam-sso-demo.riversoft.com.cn/",
       "openMode": "iframe",
       "confirmOnClose": false
     },
@@ -41,14 +41,14 @@
       "id": "menu-demo-new-tab",
       "parentId": "menu-demo-root",
       "key": "demo-new-tab",
-      "title": "新窗口入口",
+      "title": "新窗口恢复入口",
       "icon": "ExternalLink",
       "level": 2,
       "sortOrder": 20,
       "status": "active",
       "isLeaf": true,
       "resourceKey": "base-portal.demo.new-tab",
-      "url": "/placeholder/demo-new-tab",
+      "url": "https://feishu-iam-sso-demo.riversoft.com.cn/",
       "openMode": "new_tab",
       "confirmOnClose": false
     }
@@ -57,7 +57,7 @@
     {
       "key": "base-portal.demo.users",
       "name": "Base Portal 示例接入用户",
-      "description": "允许访问 v0.2.0 示例第三方应用接入包。",
+      "description": "允许访问 v0.3.0 示例第三方应用接入包。",
       "points": ["base-portal.demo.embedded", "base-portal.demo.new-tab"]
     }
   ]

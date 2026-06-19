@@ -31,7 +31,7 @@
 
 - 更强的 workspace-first 气质。
 - 更低干扰的 iframe 区域。
-- 更清晰的最大化和沉浸状态表达。
+- 更清晰的最大化状态表达。
 
 落地方式：
 
@@ -81,8 +81,8 @@ AppShell
 - `confirm_on_close`：关闭当前、关闭其他、关闭全部都参与确认。
 - iframe 正常：无感承载，无固定工具栏。
 - iframe fallback：展示“页面可能无法加载”，提供刷新、复制链接、新窗口打开。
-- 沉浸模式：隐藏左侧菜单和 TopBar 中的功能域导航，保留 TabStrip 和退出沉浸入口。
 - 最大化模式：iframe 覆盖 Portal 壳，保留清晰的退出最大化入口。
+- v0.3.0 当前 iframe 刷新：业务 tab 右键菜单和 Tab 操作菜单都提供刷新入口，只重载当前 iframe。
 
 ## GitHub Issues 对应设计规则
 
@@ -102,7 +102,8 @@ AppShell
 
 - 左侧菜单点击默认打开或激活 Portal 内部业务 tab。
 - 菜单数据中的 `new_tab`、`immersive_iframe` 不再作为默认点击体验。
-- 新窗口和最大化只由 tab 右键菜单触发。
+- `immersive_iframe` 在 v0.3.0 起作为历史数据兼容降级为标准 iframe，不再显示沉浸模式入口。
+- 新窗口、最大化和刷新只由 tab 右键菜单或 Tab 操作菜单触发。
 
 ### #4 顶部用户区
 

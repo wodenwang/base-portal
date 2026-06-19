@@ -2,9 +2,54 @@
 
 项目：`base-portal`
 
-版本：`v0.2.0`
+版本：`v0.3.0`
 
-状态：`V0.2.0_RELEASED_DEPLOYED_AND_ACCEPTED`
+状态：`V0.3.0_STEP_12_PRE_LANDING_REVIEW_COMPLETE`
+
+## v0.3.0 当前判断
+
+推荐方向：第三方无感接入体验版。
+
+当前下一步：Step 13 Git closeout / Step 14 ship，整理 diff、提交、push、tag 和 GitHub Release。
+
+关键证据：
+
+- Step 1 已确认：版本定位为 `v0.3.0`，范围包含 GitHub `#11/#12/#13`，交付终点为 release + deploy。
+- Step 2 已确认：SSO Demo 自己完成 OAuth/session；Base Portal 不传 token、cookie、code 或 secret，只负责入口编排、权限过滤、iframe/new-window/fallback 和可恢复体验。
+- Step 2 已确认：移除沉浸模式；历史 `openMode=immersive_iframe` 运行时兼容降级为标准 iframe，不做高风险 schema migration。
+- Step 2 已确认：Tab 右键菜单和 Tab 三点菜单都提供刷新当前 iframe。
+- Step 3 设计制品：`design/2026-06-20-v0.3.0-design-decision.md`
+- Step 3 治理同步：`DESIGN.md`、`design/base-portal-visual-target.md`、`design/base-portal-final-design-option-2.md`
+- Step 4 Product Design review：`design/2026-06-20-v0.3.0-product-design-review.md`
+- Step 5 Engineering review：`docs/superpowers/specs/2026-06-20-v0.3.0-engineering-review.md`
+- Step 6 Implementation plan：`IMPLEMENTATION_PLAN.md`、`docs/superpowers/plans/2026-06-20-v0.3.0-embedded-sso-workspace.md`
+- Step 7 Implementation：版本默认值、workspace refresh、移除沉浸入口、接入包兼容、seed 和 SSO Demo 菜单包已落地
+- Step 8 Local verification：`docs/verification/2026-06-20-v0.3.0-local-verification.md`
+- Step 9 Browser verification：`docs/verification/2026-06-20-v0.3.0-browser-verification.md`
+- Step 10 Visual QA：`docs/qa/2026-06-20-v0.3.0-visual-qa.md`
+- Step 11 Functional QA：`docs/qa/2026-06-20-v0.3.0-functional-qa.md`
+- Step 12 Pre-landing review：`docs/reviews/2026-06-20-v0.3.0-pre-landing-review.md`
+- SSO Demo 配合需求：`docs/external-requirements/2026-06-20-feishu-iam-sso-demo-embedded-sso.md`
+
+## v0.3.0 15-Step Ledger
+
+| Step | Gate | Status | Evidence |
+|---:|---|---|---|
+| 1 | Discovery / Brainstorm | complete | 用户确认 D1=B、D2=B、D3=C，v0.3.0 做第三方无感接入体验版并交付到 release + deploy |
+| 2 | Product/design planning review | complete | 用户确认 D1=B、D2=B、D3=B，职责边界、移除沉浸模式和刷新入口已定 |
+| 3 | Design artifact / visual target | complete | `design/2026-06-20-v0.3.0-design-decision.md`，并同步 `DESIGN.md` 与既有视觉目标中的沉浸模式冲突 |
+| 4 | Product design review | complete | `design/2026-06-20-v0.3.0-product-design-review.md`，无关键设计阻塞，无需新增完整视觉稿 |
+| 5 | Eng review | complete | `docs/superpowers/specs/2026-06-20-v0.3.0-engineering-review.md`，锁定 `new_tab` hint、`immersive_iframe` 降级、iframe refresh revision 和 SSO Demo 配合边界 |
+| 6 | Writing plan | complete | `IMPLEMENTATION_PLAN.md`、`docs/superpowers/plans/2026-06-20-v0.3.0-embedded-sso-workspace.md` |
+| 7 | Executing plan | complete | 版本默认值、workspace refresh、移除沉浸入口、接入包兼容、seed 和 SSO Demo 菜单包已落地 |
+| 8 | Verification before completion | complete | `docs/verification/2026-06-20-v0.3.0-local-verification.md`，`pnpm check`、`pnpm build`、Compose config、脚本语法和 `git diff --check` 通过 |
+| 9 | Browser verification | complete | `docs/verification/2026-06-20-v0.3.0-browser-verification.md`，桌面/平板/手机、SSO Demo iframe、tab refresh、无沉浸入口和最大化通过 |
+| 10 | Visual QA | complete | `docs/qa/2026-06-20-v0.3.0-visual-qa.md` |
+| 11 | Functional QA | complete | `docs/qa/2026-06-20-v0.3.0-functional-qa.md` |
+| 12 | Review | complete | `docs/reviews/2026-06-20-v0.3.0-pre-landing-review.md`，未发现阻塞 ship / deploy 的问题 |
+| 13 | Git closeout | current | 待整理 diff、提交并 push |
+| 14 | Ship | pending | 待创建 tag / GitHub Release |
+| 15 | Land and deploy | pending | 待授权部署并验证生产 |
 
 ## v0.2.0 当前判断
 

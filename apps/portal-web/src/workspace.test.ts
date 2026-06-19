@@ -4,9 +4,8 @@ import {
   closeOtherTabs,
   createHomeTabId,
   createInitialWorkspace,
-  enterImmersiveTab,
-  exitImmersiveTab,
   openMenuTab,
+  refreshTabFrame,
   reorderTabs,
   switchDomain
 } from './workspace';
@@ -36,7 +35,8 @@ describe('workspace model', () => {
     expect(state.tabs).toHaveLength(1);
     expect(state.tabs[0]).toMatchObject({
       id: 'menu:menu-ops-external',
-      openMode: 'iframe'
+      openMode: 'iframe',
+      refreshKey: 0
     });
   });
 
@@ -48,7 +48,10 @@ describe('workspace model', () => {
     }).state;
 
     expect(state.tabs).toHaveLength(1);
-    expect(state.tabs[0]?.openMode).toBe('iframe');
+    expect(state.tabs[0]).toMatchObject({
+      openMode: 'iframe',
+      refreshKey: 0
+    });
   });
 
   it('opens menus without an open mode as internal iframe tabs by default', () => {
@@ -59,7 +62,10 @@ describe('workspace model', () => {
     }).state;
 
     expect(state.tabs).toHaveLength(1);
-    expect(state.tabs[0]?.openMode).toBe('iframe');
+    expect(state.tabs[0]).toMatchObject({
+      openMode: 'iframe',
+      refreshKey: 0
+    });
   });
 
   it('clears business tabs when switching domains', () => {
@@ -141,36 +147,24 @@ describe('workspace model', () => {
     expect(reorderTabs(state, 'menu:menu-ops-orders', 'menu:menu-ops-invoices', 'before')).toBe(state);
   });
 
-  it('enters immersive mode for a target business tab', () => {
-    const state = openMenuTab(createInitialWorkspace([domain]), domain, menu).state;
+  it('refreshes only the target business tab frame revision', () => {
+    const state = openThreeTabs();
+    const maximized = { ...state, activeTabId: 'menu:menu-ops-orders', maximized: true };
 
-    expect(enterImmersiveTab(state, `menu:${menu.id}`)).toMatchObject({
-      activeTabId: `menu:${menu.id}`,
-      maximized: false,
-      tabs: [
-        expect.objectContaining({
-          openMode: 'immersive_iframe'
-        })
-      ]
-    });
+    const refreshed = refreshTabFrame(maximized, 'menu:menu-ops-invoices');
+
+    expect(refreshed.activeTabId).toBe('menu:menu-ops-orders');
+    expect(refreshed.maximized).toBe(true);
+    expect(refreshed.tabs.map((tab) => tab.id)).toEqual(state.tabs.map((tab) => tab.id));
+    expect(refreshed.tabs.find((tab) => tab.id === 'menu:menu-ops-orders')?.refreshKey).toBe(0);
+    expect(refreshed.tabs.find((tab) => tab.id === 'menu:menu-ops-invoices')?.refreshKey).toBe(1);
+    expect(refreshed.tabs.find((tab) => tab.id === 'menu:menu-ops-audit')?.refreshKey).toBe(0);
   });
 
-  it('exits immersive mode by restoring the tab to iframe mode', () => {
+  it('keeps refresh requests for a missing tab as no-ops', () => {
     const state = openMenuTab(createInitialWorkspace([domain]), domain, menu).state;
-    const immersive = {
-      ...state,
-      maximized: true,
-      tabs: state.tabs.map((tab) => ({ ...tab, openMode: 'immersive_iframe' as const }))
-    };
 
-    expect(exitImmersiveTab(immersive, `menu:${menu.id}`)).toMatchObject({
-      maximized: false,
-      tabs: [
-        expect.objectContaining({
-          openMode: 'iframe'
-        })
-      ]
-    });
+    expect(refreshTabFrame(state, 'menu:missing')).toBe(state);
   });
 });
 
