@@ -50,7 +50,7 @@ v0.2.0 Discovery 记录：`.my-harness/runs/2026-06-19-v0.2.0-discovery.md`
 | 10 | Visual QA | skipped | v0.2.0 未新增主要 UI，Step 3 已判定沿用 Light Command Workspace |
 | 11 | Functional QA | complete | 本地 mock-admin 覆盖导入 dry-run/apply、sync dry-run、导航可见性、审计读回 |
 | 12 | Review | complete | `docs/reviews/2026-06-19-v0.2.0-pre-landing-review.md`，2 个边界问题已 auto-fixed 并复验 |
-| 13 | Git closeout | complete | `main` pushed，commit `f5491e32f10e46595faf5a39f64c32b421627f39` |
+| 13 | Git closeout | complete | `main` pushed；最终 commit 以 `v0.2.0` tag、`origin/main` 和生产 `/version.commit` 一致读回为准 |
 | 14 | Ship | complete | GitHub Release `v0.2.0` created and retagged after release asset sync fix |
 | 15 | Land and deploy | partial | 生产 `/version=0.2.0`、IAM developer API apply、权限过滤完成；真实用户 OAuth 最终验收待人工登录 |
 
