@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties, type ReactElement } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties, type DragEvent, type ReactElement } from 'react';
 import {
   BarChart3,
   Bell,
@@ -71,6 +71,7 @@ import {
   exitImmersiveTab,
   hasConfirmTabs,
   openMenuTab,
+  reorderTabs,
   switchDomain,
   type WorkspaceState
 } from './workspace';
@@ -212,6 +213,20 @@ export function App(): ReactElement {
     setWorkspace(closeOtherTabs(current, targetTabId));
   }
 
+  function handleReorderTabs(sourceTabId: string, targetTabId: string, placement: 'before' | 'after'): void {
+    setWorkspace(reorderTabs(requireWorkspace(), sourceTabId, targetTabId, placement));
+  }
+
+  function handleMoveTab(tabId: string, direction: 'left' | 'right'): void {
+    const current = requireWorkspace();
+    const index = current.tabs.findIndex((tab) => tab.id === tabId);
+    if (index < 0) return;
+    const targetIndex = direction === 'left' ? index - 1 : index + 1;
+    const target = current.tabs[targetIndex];
+    if (!target) return;
+    setWorkspace(reorderTabs(current, tabId, target.id, direction === 'left' ? 'before' : 'after'));
+  }
+
   function handleMaximizeTab(tabId: string): void {
     setWorkspace({ ...requireWorkspace(), activeTabId: tabId, maximized: true });
   }
@@ -295,6 +310,8 @@ export function App(): ReactElement {
               onClose={handleCloseTab}
               onCloseAll={handleCloseAll}
               onCloseOthers={handleCloseOthers}
+              onReorder={handleReorderTabs}
+              onMove={handleMoveTab}
               onEnterImmersive={(tabId) => setWorkspace(enterImmersiveTab(workspace, tabId))}
               onMaximize={handleMaximizeTab}
               onExitImmersive={() => {
@@ -493,8 +510,10 @@ function MenuNode(props: {
   const active = props.activeMenuId === props.menu.id;
   const children = props.menu.children ?? [];
   const hasChildren = children.length > 0;
+  const activePath = menuContainsActive(props.menu, props.activeMenuId);
   const [expanded, setExpanded] = useState(true);
   const childrenId = `menu-children-${props.menu.id}`;
+  const flyoutId = `menu-flyout-${props.menu.id}`;
 
   function handleMenuClick(): void {
     if (props.menu.isLeaf) {
@@ -505,17 +524,18 @@ function MenuNode(props: {
   }
 
   return (
-    <div className={`menu-node level-${props.menu.level}`}>
+    <div className={`menu-node level-${props.menu.level} ${activePath ? 'active-path' : ''}`}>
       <button
         type="button"
-        className={`${props.menu.isLeaf ? 'menu-leaf' : 'menu-group'} ${active ? 'active' : ''} ${expanded ? 'expanded' : 'collapsed'}`}
+        className={`${props.menu.isLeaf ? 'menu-leaf' : 'menu-group'} ${active ? 'active' : ''} ${activePath ? 'active-path' : ''} ${expanded ? 'expanded' : 'collapsed'}`}
         aria-current={active ? 'page' : undefined}
-        aria-expanded={!props.menu.isLeaf && hasChildren ? expanded : undefined}
-        aria-controls={!props.menu.isLeaf && hasChildren ? childrenId : undefined}
+        aria-haspopup={props.collapsed && !props.menu.isLeaf && hasChildren ? 'menu' : undefined}
+        aria-expanded={!props.collapsed && !props.menu.isLeaf && hasChildren ? expanded : undefined}
+        aria-controls={!props.collapsed && !props.menu.isLeaf && hasChildren ? childrenId : undefined}
         onClick={handleMenuClick}
         title={props.collapsed ? props.menu.title : undefined}
       >
-        <MenuGlyph isLeaf={props.menu.isLeaf} active={active} />
+        <MenuGlyph isLeaf={props.menu.isLeaf} active={active || activePath} />
         {!props.collapsed && <span>{props.menu.title}</span>}
         {!props.collapsed && !props.menu.isLeaf && hasChildren && (
           <ChevronDown className={`menu-chevron ${expanded ? 'expanded' : ''}`} size={14} />
@@ -534,8 +554,53 @@ function MenuNode(props: {
           ))}
         </div>
       )}
+      {props.collapsed && !props.menu.isLeaf && hasChildren && (
+        <div id={flyoutId} className="menu-flyout" role="menu" aria-label={props.menu.title}>
+          <div className="menu-flyout-title">{props.menu.title}</div>
+          <MenuFlyoutItems menus={children} activeMenuId={props.activeMenuId} onOpen={props.onOpen} />
+        </div>
+      )}
     </div>
   );
+}
+
+function MenuFlyoutItems(props: {
+  menus: NavigationMenu[];
+  activeMenuId: string | null;
+  onOpen: (menu: NavigationMenu) => void;
+}): ReactElement {
+  return (
+    <div className="menu-flyout-list">
+      {props.menus.map((menu) =>
+        menu.isLeaf ? (
+          <button
+            key={menu.id}
+            type="button"
+            role="menuitem"
+            className={`menu-flyout-item ${props.activeMenuId === menu.id ? 'active' : ''}`}
+            onClick={() => props.onOpen(menu)}
+          >
+            <MenuGlyph isLeaf active={props.activeMenuId === menu.id} />
+            <span>{menu.title}</span>
+          </button>
+        ) : (
+          <div key={menu.id} className={`menu-flyout-group ${menuContainsActive(menu, props.activeMenuId) ? 'active-path' : ''}`}>
+            <div className="menu-flyout-group-title">
+              <MenuGlyph isLeaf={false} active={menuContainsActive(menu, props.activeMenuId)} />
+              <span>{menu.title}</span>
+            </div>
+            <MenuFlyoutItems menus={menu.children ?? []} activeMenuId={props.activeMenuId} onOpen={props.onOpen} />
+          </div>
+        )
+      )}
+    </div>
+  );
+}
+
+function menuContainsActive(menu: NavigationMenu, activeMenuId: string | null): boolean {
+  if (!activeMenuId) return false;
+  if (menu.id === activeMenuId) return true;
+  return (menu.children ?? []).some((child) => menuContainsActive(child, activeMenuId));
 }
 
 function MenuGlyph({ isLeaf, active }: { isLeaf: boolean; active: boolean }): ReactElement {
@@ -561,6 +626,8 @@ function TabStrip(props: {
   onClose: (tabId: string) => void;
   onCloseAll: () => void;
   onCloseOthers: (tabId?: string) => void;
+  onReorder: (sourceTabId: string, targetTabId: string, placement: 'before' | 'after') => void;
+  onMove: (tabId: string, direction: 'left' | 'right') => void;
   onEnterImmersive: (tabId: string) => void;
   onMaximize: (tabId: string) => void;
   onExitImmersive: () => void;
@@ -568,7 +635,44 @@ function TabStrip(props: {
 }): ReactElement {
   const homeId = createHomeTabId(props.domain.key);
   const activeBusinessTab = props.workspace.tabs.find((tab) => tab.id === props.workspace.activeTabId) ?? null;
+  const activeBusinessIndex = activeBusinessTab ? props.workspace.tabs.findIndex((tab) => tab.id === activeBusinessTab.id) : -1;
   const hasBusinessTabs = props.workspace.tabs.length > 0;
+  const [draggingTabId, setDraggingTabId] = useState<string | null>(null);
+  const [dropIndicator, setDropIndicator] = useState<{ tabId: string; placement: 'before' | 'after' } | null>(null);
+
+  function getDropPlacement(event: DragEvent<HTMLButtonElement>): 'before' | 'after' {
+    const bounds = event.currentTarget.getBoundingClientRect();
+    return event.clientX < bounds.left + bounds.width / 2 ? 'before' : 'after';
+  }
+
+  function handleDragStart(event: DragEvent<HTMLButtonElement>, tabId: string): void {
+    setDraggingTabId(tabId);
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', tabId);
+  }
+
+  function handleDragOver(event: DragEvent<HTMLButtonElement>, targetTabId: string): void {
+    const sourceTabId = draggingTabId ?? event.dataTransfer.getData('text/plain');
+    if (!sourceTabId || sourceTabId === targetTabId) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    setDropIndicator({ tabId: targetTabId, placement: getDropPlacement(event) });
+  }
+
+  function handleDrop(event: DragEvent<HTMLButtonElement>, targetTabId: string): void {
+    event.preventDefault();
+    const sourceTabId = draggingTabId ?? event.dataTransfer.getData('text/plain');
+    const placement = dropIndicator?.tabId === targetTabId ? dropIndicator.placement : getDropPlacement(event);
+    setDraggingTabId(null);
+    setDropIndicator(null);
+    if (!sourceTabId || sourceTabId === targetTabId) return;
+    props.onReorder(sourceTabId, targetTabId, placement);
+  }
+
+  function clearDragState(): void {
+    setDraggingTabId(null);
+    setDropIndicator(null);
+  }
 
   return (
     <div className="tab-strip">
@@ -580,19 +684,28 @@ function TabStrip(props: {
         >
           {props.domain.name}
         </button>
-        {props.workspace.tabs.map((tab) => (
+        {props.workspace.tabs.map((tab, index) => (
           <ContextMenu key={tab.id}>
             <ContextMenuTrigger asChild>
               <button
                 className={`tab ${props.workspace.activeTabId === tab.id ? 'active' : ''}`}
+                draggable
+                data-dragging={draggingTabId === tab.id ? 'true' : undefined}
+                data-drop-position={dropIndicator?.tabId === tab.id ? dropIndicator.placement : undefined}
                 onClick={() => props.onActivate(tab.id)}
                 onContextMenu={() => props.onActivate(tab.id)}
+                onDragStart={(event) => handleDragStart(event, tab.id)}
+                onDragOver={(event) => handleDragOver(event, tab.id)}
+                onDrop={(event) => handleDrop(event, tab.id)}
+                onDragEnd={clearDragState}
                 title={tab.title}
               >
                 <span>{tab.title}</span>
                 <span
                   className="tab-close"
                   title="关闭当前标签"
+                  onMouseDown={(event) => event.stopPropagation()}
+                  onDragStart={(event) => event.preventDefault()}
                   onClick={(event) => {
                     event.stopPropagation();
                     props.onClose(tab.id);
@@ -614,6 +727,15 @@ function TabStrip(props: {
               <ContextMenuItem onSelect={() => props.onEnterImmersive(tab.id)}>
                 <PanelsTopLeft size={14} />
                 <span>沉浸模式</span>
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuItem disabled={index === 0} onSelect={() => props.onMove(tab.id, 'left')}>
+                <ChevronsLeft size={14} />
+                <span>左移</span>
+              </ContextMenuItem>
+              <ContextMenuItem disabled={index === props.workspace.tabs.length - 1} onSelect={() => props.onMove(tab.id, 'right')}>
+                <ChevronsRight size={14} />
+                <span>右移</span>
               </ContextMenuItem>
               <ContextMenuSeparator />
               <ContextMenuItem onSelect={() => props.onClose(tab.id)}>
@@ -667,6 +789,25 @@ function TabStrip(props: {
             >
               <PanelsTopLeft size={14} />
               <span>沉浸模式</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              disabled={!activeBusinessTab || activeBusinessIndex <= 0}
+              onSelect={() => {
+                if (activeBusinessTab) props.onMove(activeBusinessTab.id, 'left');
+              }}
+            >
+              <ChevronsLeft size={14} />
+              <span>左移</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={!activeBusinessTab || activeBusinessIndex < 0 || activeBusinessIndex >= props.workspace.tabs.length - 1}
+              onSelect={() => {
+                if (activeBusinessTab) props.onMove(activeBusinessTab.id, 'right');
+              }}
+            >
+              <ChevronsRight size={14} />
+              <span>右移</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

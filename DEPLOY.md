@@ -1,7 +1,7 @@
 # Base Portal 部署与升级规范
 
 状态：DEPLOYMENT_BASELINE
-适用版本：v0.1.1
+适用版本：v0.1.2
 生产域名：`https://base-portal.riversoft.com.cn`
 生产服务器：`bpmt@120.24.236.92:/home/bpmt/base-portal`
 服务器 nginx 目录：`bpmt@120.24.236.92:~/nginx`
@@ -11,9 +11,9 @@
 ## 1. 核心原则
 
 - 项目开发过程中和最终部署过程中，必须严格执行本文件。
-- v0.1.1 的交付范围是在 v0.1.0 基础上硬化生产升级链路：可控镜像 pull 策略、可配置 Dockerfile 基础镜像、favicon 和上线证据收口。
+- v0.1.2 的交付范围是在 v0.1.1 生产基线上完成 UX hardening：Tab 关闭按钮固定居右、Tab 桌面拖拽排序和菜单 fallback、菜单收缩态 Compact flyout sidebar、Radix 菜单状态一致性。
 - 正式部署以版本为最小管理颗粒度。
-- 生产发布物是版本化 Docker image，tag 必须与 release 版本一致，例如 `v0.1.1`。
+- 生产发布物是版本化 Docker image，tag 必须与 release 版本一致，例如 `v0.1.2`。
 - 生产运行形态是 Docker Compose。
 - `install.sh` 只负责首次初始化安装。
 - `upgrade.sh` 只负责已安装版本到目标版本的升级。
@@ -52,7 +52,7 @@ Alibaba Cloud DNS A record
 需要区分以下概念：
 
 - 当前安装版本：从 `.deploy/version` 读取。
-- 目标版本：本次安装或升级要达到的 release 版本，例如 `v0.1.1`。
+- 目标版本：本次安装或升级要达到的 release 版本，例如 `v0.1.2`。
 - 镜像版本：与 release 版本一致的 Docker image tag。
 - Compose 版本：目标 release 携带的 `deploy/docker-compose.yml` 和 `deploy/.env.example`。
 - DB 版本：Prisma migration 成功应用后的数据库版本。
@@ -61,8 +61,8 @@ Alibaba Cloud DNS A record
 当前版本的镜像地址必须落为显式变量，例如：
 
 ```text
-BASE_PORTAL_IMAGE=<registry>/base-portal:v0.1.1
-BASE_PORTAL_VERSION=v0.1.1
+BASE_PORTAL_IMAGE=<registry>/base-portal:v0.1.2
+BASE_PORTAL_VERSION=v0.1.2
 ```
 
 生产 Compose 必须使用 `image: ${BASE_PORTAL_IMAGE:?BASE_PORTAL_IMAGE is required}` 或等价固定版本镜像，不得只依赖 `build:`。
@@ -88,7 +88,7 @@ BASE_PORTAL_VERSION=v0.1.1
   data/
     postgres/
   releases/
-    v0.1.1/
+    v0.1.2/
   backups/
 ```
 
@@ -100,7 +100,7 @@ BASE_PORTAL_VERSION=v0.1.1
 
 `install.sh` 必须：
 
-1. 默认目标版本为当前仓库版本 `v0.1.1`，也允许显式传入 `--version v0.1.1`。
+1. 默认目标版本为当前仓库版本 `v0.1.2`，也允许显式传入 `--version v0.1.2`。
 2. 检查 `.deploy/version` 是否已经存在；默认拒绝重复初始化。
 3. 检查 `docker`、`docker compose`、`ssh`、`tar` 或等价部署依赖。
 4. 校验生产镜像 tag 是明确版本，不是 `latest`。

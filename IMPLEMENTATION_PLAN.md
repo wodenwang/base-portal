@@ -1,180 +1,211 @@
-# Base Portal v0.1.1 Implementation Plan
+# Base Portal v0.1.2 UX Hardening Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` or `superpowers:subagent-driven-development` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 交付 `base-portal` v0.1.1 生产硬化版本：把 v0.1.0 生产上线过程中暴露的部署脚本、镜像构建和 favicon 问题收口，并完成 GitHub release、远端升级和生产健康验证。
+**Goal:** 交付 `base-portal` v0.1.2 UX hardening patch release，完成 GitHub issues #6-#9：Tab 关闭按钮固定居右、Tab 桌面拖拽排序和菜单 fallback、菜单栏收缩态 Compact flyout sidebar、Radix ContextMenu/DropdownMenu 鼠标和状态一致性，并完成 release、远端部署和线上验证。
 
-**Architecture:** 不改变 Feishu IAM OAuth、session、权限、菜单、审计和 Portal UI 主链路。v0.1.1 只改生产发布面、静态 favicon 和证据文档。部署仍采用固定版本 Docker image + Docker Compose，`install.sh` 负责首次安装，`upgrade.sh` 负责版本升级。
+**Architecture:** 不改变 Feishu IAM OAuth、session、权限、审计、数据库 schema、部署拓扑或第二套 UI 框架。v0.1.2 只在现有 React workspace shell、`workspace.ts` 状态模型、Radix 菜单 wrapper 和 CSS 内收口 UX 行为。
 
-**Tech Stack:** React 19、TypeScript、Vite、NestJS、Prisma、PostgreSQL、Docker Compose、nginx、Vitest、Playwright、GitHub Release。
+**Tech Stack:** React 19、TypeScript、Vite、shadcn/ui 风格组件、Radix primitives、lucide-react、Tailwind CSS、Vitest、Playwright、Docker Compose、GitHub Release。
 
 ## Scope Decisions
 
-- D1=A：版本性质为 `v0.1.1` 生产硬化，不进入 `v0.2.0` 门户功能扩展。
-- D2=A：只做生产硬化和证据收口；真实 OAuth 端到端人工验证可作为发布后独立 QA，不阻塞本版本。
-- D3=A：完成标准为本地修复、GitHub release、生产升级验证和文档证据闭环。
+- D1=B：v0.1.2 范围包含 #6、#7、#8、#9。
+- Step 4 设计结论：接受菜单收缩态 B Compact flyout sidebar。
+- Step 4 设计结论：接受桌面拖拽 + 菜单 fallback，手机不强求触屏拖拽。
+- Step 4 设计结论：本版不强制键盘快捷键。
+- Step 4 设计结论：接受 Radix ContextMenu/DropdownMenu 统一状态承载。
+- 非范围：菜单管理 UI、Tab 持久化、工作台功能扩展、第二套 UI 框架、部署面架构改动。
 
 ## Files
 
-### Deployment hardening
+### Product workspace
 
-- Modify: `install.sh`
-- Modify: `upgrade.sh`
-- Modify: `deploy/web.Dockerfile`
-- Modify: `deploy/docker-compose.yml`
-- Modify: `deploy/.env.example`
-- Modify: `DEPLOY.md`
+- Modify: `apps/portal-web/src/workspace.ts`
+- Modify: `apps/portal-web/src/workspace.test.ts`
+- Modify: `apps/portal-web/src/App.tsx`
+- Modify: `apps/portal-web/src/styles.css`
 
-### Version and web shell
+### Version and release defaults
 
 - Modify: `package.json`
 - Modify: `apps/api/package.json`
 - Modify: `apps/portal-web/package.json`
-- Modify: `apps/portal-web/index.html`
-- Create: `apps/portal-web/public/favicon.svg`
-
-### Evidence and release docs
-
+- Modify: `apps/api/src/modules/health.controller.ts`
+- Modify: `deploy/.env.example`
+- Modify: `deploy/docker-compose.yml`
+- Modify: `install.sh`
+- Modify: `upgrade.sh`
+- Modify: `DEPLOY.md`
 - Modify: `README.md`
+
+### Evidence and harness
+
 - Modify: `.my-harness/README.md`
 - Modify: `.my-harness/status.md`
-- Create: `.my-harness/runs/2026-06-19-v0.1.1.md`
-- Create: `docs/release-v0.1.1.md`
-- Create: `docs/ship/2026-06-19-v0.1.1-ship-preflight.md`
-- Create: `docs/verification/2026-06-19-v0.1.1-production-deploy.md`
-- Include: `docs/verification/2026-06-19-bpmt-production-deploy.md`
-- Include: `output/playwright/base-portal-production-2026-06-19.png`
+- Create: `.my-harness/runs/2026-06-19-v0.1.2.md`
+- Create: `docs/release-v0.1.2.md`
+- Create: `docs/ship/2026-06-19-v0.1.2-ship-preflight.md`
+- Create: `docs/verification/2026-06-19-v0.1.2-production-deploy.md`
+- Create: `docs/superpowers/plans/2026-06-19-v0.1.2-ux-hardening.md`
+- Create: Playwright screenshots under `output/playwright/`
 
 ## Tasks
 
-### Task 1: Version and favicon
+### Task 1: Workspace state model
 
-- [x] **Step 1: bump repository version defaults to v0.1.1**
-
-Expected behavior:
-
-- Root, API, and portal package versions read `0.1.1`.
-- Compose and env example default to `BASE_PORTAL_VERSION=v0.1.1` and `APP_VERSION=0.1.1`.
-- `install.sh` defaults to `v0.1.1`.
-- `upgrade.sh` defaults to `--to v0.1.1`.
-
-- [x] **Step 2: add explicit browser favicon**
+- [x] **Step 1: add pure `reorderTabs` model**
 
 Expected behavior:
 
-- Vite serves `/favicon.svg`.
-- `index.html` declares the favicon link.
-- Production login page no longer emits the `/favicon.ico` 404 console error that was seen after v0.1.0.
+- `reorderTabs(state, sourceTabId, targetTabId, placement)` reorders only business tabs.
+- Fixed home tab is never movable because it is not represented in `state.tabs`.
+- Unknown source, unknown target, same source/target, or no-op placement returns the original state object.
+- `activeTabId`, `maximized`, `openMode`, `confirmOnClose`, `domainKey`, `url` and tab object data are preserved.
 
-### Task 2: Pull policy hardening
-
-- [x] **Step 1: add pull policy inputs to install and upgrade scripts**
-
-Expected behavior:
-
-- `BASE_PORTAL_PULL_POLICY=missing|always|never` is accepted.
-- `--pull missing|always|never` is accepted.
-- Invalid values fail before remote mutation.
-
-- [x] **Step 2: avoid mandatory Docker Hub pulls when images already exist**
+- [x] **Step 2: add focused Vitest coverage**
 
 Expected behavior:
 
-- `missing` pulls only missing `postgres:16-alpine` or target web image.
-- `never` skips all pulls and runs `docker compose up -d --no-build --pull never`.
-- `always` preserves the explicit pull behavior.
-- Scripts still reject `latest`, missing images, unsafe env, and placeholder secrets.
-- Existing production `.env` files are not blocked for missing optional `BASE_PORTAL_PULL_POLICY`; the script argument or process env supplies the value.
-- `install.sh` and `upgrade.sh` pass `GIT_COMMIT` into the remote Compose environment so `/version` can prove the deployed commit.
-- `upgrade.sh --force` allows an explicit same-version redeploy for a failed or incomplete release candidate while preserving the default refusal.
+- Moving before and after works.
+- Active tab remains active after moving.
+- Maximized state remains unchanged.
+- Invalid requests are no-op.
 
-### Task 3: Build image base hardening
+### Task 2: Tab strip UX
 
-- [x] **Step 1: make Dockerfile base image configurable**
+- [x] **Step 1: implement fixed close button layout**
 
 Expected behavior:
 
-- `deploy/web.Dockerfile` supports `ARG NODE_IMAGE=node:22-alpine`.
-- Remote build can use a locally tagged mirror while preserving the default image.
+- Business tab title truncates with ellipsis.
+- Close affordance stays pinned to the right edge of each business tab.
+- Home tab keeps no close button and cannot be dragged.
 
-### Task 4: Verification
+- [x] **Step 2: implement desktop HTML drag/drop reorder**
 
-- [x] **Step 1: run local checks**
+Expected behavior:
+
+- Business tabs can be dragged before/after another business tab on desktop.
+- Drop indicator appears on the left or right edge of the target tab.
+- Dropping on home tab or outside a valid business tab does not move anything.
+- Reorder does not close tabs, change active tab, exit maximized mode, exit immersive mode, or bypass confirm-close behavior.
+
+- [x] **Step 3: add menu fallback**
+
+Expected behavior:
+
+- Context menu and Tab action menu expose `左移` / `右移` for business tabs.
+- First tab disables `左移`; last tab disables `右移`.
+- Fallback uses the same `reorderTabs` model as drag/drop.
+
+### Task 3: Compact flyout sidebar
+
+- [x] **Step 1: replace collapsed text deformation with compact icon entry**
+
+Expected behavior:
+
+- Collapsed sidebar width stays stable.
+- Header text does not squeeze into unreadable fragments.
+- Workbench and menu nodes remain icon-first and scan-friendly.
+
+- [x] **Step 2: add hover/focus flyout for collapsed groups**
+
+Expected behavior:
+
+- Hovering or focusing a collapsed group with children opens a compact flyout.
+- Flyout shows group title and descendant leaf labels.
+- Leaf actions call the same `onOpen` path as expanded menu clicks.
+- Active child path is visually indicated in collapsed mode.
+- ARIA does not claim unsupported keyboard shortcut behavior.
+
+### Task 4: Radix menu state consistency
+
+- [x] **Step 1: unify item cursor and visual states**
+
+Expected behavior:
+
+- Enabled ContextMenu/DropdownMenu items show pointer cursor.
+- Highlighted/hover/focus states share the same background and text treatment.
+- Disabled items are muted, non-interactive and use `not-allowed`.
+- Separators and labels do not look clickable.
+
+### Task 5: Version bump and local verification
+
+- [x] **Step 1: bump release defaults to v0.1.2**
+
+Expected behavior:
+
+- Root, API and portal package versions read `0.1.2`.
+- `/version` fallback reads `0.1.2`.
+- Compose and env example default to `BASE_PORTAL_VERSION=v0.1.2` and `APP_VERSION=0.1.2`.
+- `install.sh` and `upgrade.sh` default to `v0.1.2`.
+
+- [x] **Step 2: run required local checks**
 
 Run:
 
 ```bash
+pnpm --filter @base-portal/portal-web test
+pnpm --filter @base-portal/portal-web typecheck
+pnpm --filter @base-portal/portal-web lint
+pnpm --filter @base-portal/portal-web build
+pnpm --filter @base-portal/api test
+pnpm --filter @base-portal/api typecheck
+pnpm --filter @base-portal/api lint
+pnpm --filter @base-portal/api build
 bash -n install.sh
 bash -n upgrade.sh
-./install.sh --help >/tmp/base-portal-install-help.txt
-./upgrade.sh --help >/tmp/base-portal-upgrade-help.txt
-BASE_PORTAL_IMAGE=base-portal-release:v0.1.1 docker compose --env-file deploy/.env.example -f deploy/docker-compose.yml config
-pnpm check
-pnpm build
+BASE_PORTAL_IMAGE=base-portal-release:v0.1.2 docker compose --env-file deploy/.env.example -f deploy/docker-compose.yml config
 git diff --check
 ```
 
-Result: passed on 2026-06-19 19:55 CST.
+### Task 6: Browser, QA, review, ship and deploy
 
-- `bash -n install.sh`：通过。
-- `bash -n upgrade.sh`：通过。
-- `./install.sh --help >/tmp/base-portal-install-help.txt`：通过。
-- `./upgrade.sh --help >/tmp/base-portal-upgrade-help.txt`：通过。
-- `BASE_PORTAL_IMAGE=base-portal-release:v0.1.1 docker compose --env-file deploy/.env.example -f deploy/docker-compose.yml config`：通过，读回 `image: base-portal-release:v0.1.1`、`APP_VERSION: 0.1.1`、`BASE_PORTAL_VERSION: v0.1.1`。
-- `pnpm check`：通过，API 2 tests、portal-web 13 tests。
-- `pnpm build`：通过，portal-web build includes `dist/favicon.svg`。
-- `git diff --check`：通过。
-- `BASE_PORTAL_IMAGE=base-portal-release:v0.1.1 ./upgrade.sh --pull invalid`：退出码 `2`，在远端变更前拒绝 invalid pull policy。
-- `./install.sh --image base-portal:v0.1.1 --skip-dns --skip-nginx`：退出码 `1`，拒绝本地占位镜像作为生产输入。
+- [x] **Step 1: run browser UX checks**
 
-- [x] **Step 2: verify favicon in browser or built artifact**
+Expected evidence:
 
-Result: `apps/portal-web/dist/favicon.svg` exists after `pnpm build`, and `dist/index.html` includes `<link rel="icon" type="image/svg+xml" href="/favicon.svg" />`.
+- Desktop 1440x900: collapsed sidebar flyout, tab close fixed layout, drag reorder, menu fallback, Radix state.
+- Tablet 834x1112: collapsed/sidebar behavior does not overlap workspace.
+- Mobile 390x844: no touch drag requirement; menu fallback and layout remain usable.
 
-### Task 5: Ship and deploy
-
-- [x] **Step 1: commit and push v0.1.1**
+- [ ] **Step 2: complete review and release**
 
 Expected:
 
-- `main` is pushed to `origin/main`.
-- `v0.1.1` tag exists and points to the release commit.
-- GitHub release `v0.1.1` exists.
+- Diff reviewed against #6-#9.
+- `main` pushed.
+- Tag `v0.1.2` exists and points to the release commit.
+- GitHub Release `v0.1.2` exists.
 
-- [x] **Step 2: build/load production image and run upgrade**
-
-Expected:
-
-- 92 server has `base-portal-release:v0.1.1`.
-- `./upgrade.sh --from v0.1.0 --to v0.1.1 --image base-portal-release:v0.1.1 --pull never` completed.
-- `./upgrade.sh --from v0.1.1 --to v0.1.1 --image base-portal-release:v0.1.1 --pull never --force` completed after GIT_COMMIT propagation was fixed.
-- Remote `.deploy/version` reads `v0.1.1`.
-
-- [x] **Step 3: verify production**
+- [ ] **Step 3: deploy and verify production**
 
 Expected:
 
+- 92 server has `base-portal-release:v0.1.2`.
+- `./upgrade.sh --from v0.1.1 --to v0.1.2 --image base-portal-release:v0.1.2 --pull never` completes.
+- Remote `.deploy/version` reads `v0.1.2`.
 - `https://base-portal.riversoft.com.cn/health` returns 200.
 - `https://base-portal.riversoft.com.cn/ready` returns 200.
-- `https://base-portal.riversoft.com.cn/version` reports version `0.1.1` and the release commit.
-- Browser smoke confirms login page renders and favicon error is gone.
+- `https://base-portal.riversoft.com.cn/version` reports version `0.1.2` and the release commit.
 
 ## 15-Step my-harness Ledger
 
 | Step | Gate | Status | Evidence |
 |---:|---|---|---|
-| 1 | Discovery / Brainstorm | complete | User accepted default v0.1.1 production hardening scope |
-| 2 | Product/design planning review | skipped | No UI workflow change; favicon only |
-| 3 | Design artifact / visual target | skipped | Existing `DESIGN.md` remains source of truth |
-| 4 | Design review | skipped | No visual layout change |
-| 5 | Eng review | complete | Scope decisions in this plan |
-| 6 | Writing plan | complete | `IMPLEMENTATION_PLAN.md` |
-| 7 | Executing plan | complete | Deployment hardening edits |
-| 8 | Verification before completion | complete | Local command evidence above |
-| 9 | Browser verification | complete | Built favicon artifact and production browser smoke verified |
-| 10 | Visual QA | skipped | No visual layout change |
-| 11 | Functional QA | complete | Health/version/API smoke |
-| 12 | Review | complete | Diff review before ship |
-| 13 | Git closeout | complete | `git status`, staged diff |
-| 14 | Ship | complete | Commit, tag, GitHub release |
-| 15 | Land and deploy | complete | Production upgrade and health checks |
+| 1 | Discovery / Brainstorm | complete | D1=B, include issues #6-#9 |
+| 2 | Product/design planning review | complete | Read-only Step 2 review |
+| 3 | Design artifact / visual target | complete | v0.1.2 increment target: Compact flyout sidebar, fixed tab close, reorder matrix, Radix states |
+| 4 | Product design review | complete | Accepted Step 4 decisions |
+| 5 | Eng review | complete | No blocking decision gate; native drag/drop + pure model |
+| 6 | Writing plan | complete | `IMPLEMENTATION_PLAN.md` and `docs/superpowers/plans/2026-06-19-v0.1.2-ux-hardening.md` |
+| 7 | Executing plan | complete | #6-#9 implementation in `workspace.ts`, `App.tsx`, `styles.css` |
+| 8 | Verification before completion | complete | `pnpm check`, `pnpm build`, Compose config, `git diff --check` passed |
+| 9 | Browser verification | complete | Playwright desktop/tablet/mobile screenshots under `output/playwright/` |
+| 10 | Visual QA | complete | Desktop flyout and tablet/mobile regression screenshots reviewed |
+| 11 | Functional QA | complete | Local mock-auth shell, drag reorder, menu fallback, `/health`, `/ready`, `/version` |
+| 12 | Review | complete | `docs/reviews/2026-06-19-v0.1.2-pre-landing-review.md` |
+| 13 | Git closeout | pending | Commit/tag/release prep |
+| 14 | Ship | pending | GitHub release |
+| 15 | Land and deploy | pending | Production upgrade and online readback |

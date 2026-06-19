@@ -2,48 +2,56 @@
 
 项目：`base-portal`
 
-版本：`v0.1.1`
+版本：`v0.1.2`
 
-状态：`COMPLETE_V0.1.1_RELEASED_AND_DEPLOYED`
+状态：`REVIEWED_READY_FOR_SHIP`
 
-## v0.1.1 范围
+## v0.1.2 范围
 
-- 固化部署脚本 pull 策略：`missing`、`always`、`never`。
-- 允许远端使用已存在镜像完成升级，避免 Docker Hub 超时阻塞。
-- 支持 Dockerfile 基础镜像参数 `NODE_IMAGE`。
-- 补前端 favicon，消除 v0.1.0 生产页面唯一 console error。
-- 同步 v0.1.0 已上线证据和 v0.1.1 发布证据。
+- #6 Tab 关闭按钮固定居右。
+- #7 Tab 支持桌面拖拽改变顺序，并提供菜单 fallback 左移/右移。
+- #8 菜单栏收缩态改为 Compact flyout sidebar。
+- #9 ContextMenu/DropdownMenu 统一 cursor、hover、focus、disabled 状态。
+
+## 非范围
+
+- 不引入菜单管理 UI。
+- 不引入 Tab 持久化。
+- 不扩展工作台功能。
+- 不引入第二套 UI 框架。
+- 不改变部署拓扑、OAuth、权限、数据库 schema 或 secret 处理边界。
 
 ## 15-Step Ledger
 
 | Step | Gate | Status | Evidence |
 |---:|---|---|---|
-| 1 | Discovery / Brainstorm | complete | 用户确认默认项：选择 `v0.1.1` 生产硬化范围并推进到版本完结 |
-| 2 | Product/design planning review | skipped | 不改变 UI 流程，favicon only |
-| 3 | Design artifact / visual target | skipped | 继续使用 `DESIGN.md` 和既有 v0.1.0 视觉基线 |
-| 4 | Design review | skipped | 无布局或交互视觉变更 |
-| 5 | Eng review | complete | `IMPLEMENTATION_PLAN.md` 的 Scope Decisions |
-| 6 | Writing plan | complete | `IMPLEMENTATION_PLAN.md` |
-| 7 | Executing plan | complete | 部署脚本、Dockerfile、版本和 favicon 改动 |
-| 8 | Verification before completion | complete | `pnpm check`、`pnpm build`、`bash -n`、Compose config、`git diff --check` 均通过 |
-| 9 | Browser verification | complete | Playwright 生产 smoke：登录页渲染、console error 0、`/favicon.svg` 200 |
-| 10 | Visual QA | skipped | 无视觉布局变更 |
-| 11 | Functional QA | complete | 生产 `/health`、`/ready`、`/version` 验证通过 |
-| 12 | Review | complete | staged diff、secret boundary、`git diff --check` 已检查 |
-| 13 | Git closeout | complete | v0.1.1 变更提交并推送 `main` |
-| 14 | Ship | complete | `v0.1.1` tag 和 GitHub release 完成 |
-| 15 | Land and deploy | complete | 92 服务器运行 `base-portal-release:v0.1.1`，`.deploy/version` 为 `v0.1.1` |
+| 1 | Discovery / Brainstorm | complete | 用户确认 D1=B，v0.1.2 包含 #6-#9 |
+| 2 | Product/design planning review | complete | Step 2 read-only review：#6/#9 局部收口，#7/#8 需明确视觉交互目标 |
+| 3 | Design artifact / visual target | complete | Step 3 草案：Compact flyout sidebar、固定 close、拖拽状态矩阵、Radix 状态规则 |
+| 4 | Product design review | complete | 接受方案 B、桌面拖拽 + 菜单 fallback、手机不强求触屏拖拽 |
+| 5 | Eng review | complete | 原生 HTML drag/drop + `reorderTabs` 纯模型，不引入排序库 |
+| 6 | Writing plan | complete | `IMPLEMENTATION_PLAN.md`、`docs/superpowers/plans/2026-06-19-v0.1.2-ux-hardening.md` |
+| 7 | Executing plan | complete | #6-#9 实现落地 |
+| 8 | Verification before completion | complete | `pnpm check`、`pnpm build`、Compose config、`git diff --check` 通过 |
+| 9 | Browser verification | complete | Playwright desktop/tablet/mobile 截图 |
+| 10 | Visual QA | complete | 视觉复查发现并修复移动断点侧栏泄漏 |
+| 11 | Functional QA | complete | 本地 mock-auth、Tab fallback、drag reorder、health/ready/version |
+| 12 | Review | complete | `docs/reviews/2026-06-19-v0.1.2-pre-landing-review.md` |
+| 13 | Git closeout | pending | 待 commit、tag、push |
+| 14 | Ship | pending | 待 GitHub release |
+| 15 | Land and deploy | pending | 待 92 服务器升级和线上读回 |
 
-## v0.1.1 生产读回
+## 当前验证读回
 
-- 远端 `.deploy/version`：`v0.1.1`。
-- 远端容器：`deploy-web-1` 使用 `base-portal-release:v0.1.1`。
-- 远端 image id：`sha256:2a34dff5b0ddbd987d4e41cb5922252fae74d89c3d54055dcb1bf90aacb98fd8`。
-- 生产 `/health`：`{"status":"ok"}`。
-- 生产 `/ready`：`{"status":"ready","checks":{"database":"ok"}}`。
-- 生产 `/version`：`version=0.1.1`，commit 由最终 release tag 和线上读回校验。
-- 生产 favicon：`https://base-portal.riversoft.com.cn/favicon.svg` 返回 200。
-- Playwright 截图：`output/playwright/base-portal-v0.1.1-production-login.png`。
+- 本地 QA URL：`http://127.0.0.1:3102`
+- 本地镜像：`base-portal-local:v0.1.2`
+- 本地 `/health`：`{"status":"ok"}`
+- 本地 `/ready`：`{"status":"ready","checks":{"database":"ok"}}`
+- 本地 `/version`：`version=0.1.2`
+- Playwright 截图：
+  - `output/playwright/base-portal-v0.1.2-desktop-flyout.png`
+  - `output/playwright/base-portal-v0.1.2-tablet-834x1112.png`
+  - `output/playwright/base-portal-v0.1.2-mobile-390x844.png`
 
 ## Secret 边界
 

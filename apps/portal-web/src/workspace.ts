@@ -99,6 +99,32 @@ export function closeOtherTabs(state: WorkspaceState, tabId: string): WorkspaceS
   };
 }
 
+export function reorderTabs(
+  state: WorkspaceState,
+  sourceTabId: string,
+  targetTabId: string,
+  placement: 'before' | 'after'
+): WorkspaceState {
+  if (sourceTabId === targetTabId) return state;
+
+  const sourceIndex = state.tabs.findIndex((tab) => tab.id === sourceTabId);
+  const targetIndex = state.tabs.findIndex((tab) => tab.id === targetTabId);
+  if (sourceIndex < 0 || targetIndex < 0) return state;
+
+  const tabs = [...state.tabs];
+  const sourceTab = tabs.splice(sourceIndex, 1)[0];
+  if (!sourceTab) return state;
+  const adjustedTargetIndex = tabs.findIndex((tab) => tab.id === targetTabId);
+  const insertIndex = placement === 'before' ? adjustedTargetIndex : adjustedTargetIndex + 1;
+
+  tabs.splice(insertIndex, 0, sourceTab);
+
+  const unchanged = tabs.every((tab, index) => tab.id === state.tabs[index]?.id);
+  if (unchanged) return state;
+
+  return { ...state, tabs };
+}
+
 export function hasConfirmTabs(tabs: WorkspaceTab[]): boolean {
   return tabs.some((tab) => tab.confirmOnClose);
 }

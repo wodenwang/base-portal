@@ -7,6 +7,7 @@ import {
   enterImmersiveTab,
   exitImmersiveTab,
   openMenuTab,
+  reorderTabs,
   switchDomain
 } from './workspace';
 import type { NavigationDomain, NavigationMenu } from './types';
@@ -98,6 +99,48 @@ describe('workspace model', () => {
     expect(closeOtherTabs(state, 'menu:missing')).toBe(state);
   });
 
+  it('reorders business tabs before a target while preserving active and maximized state', () => {
+    const state = openThreeTabs();
+    const maximized = { ...state, activeTabId: 'menu:menu-ops-orders', maximized: true };
+
+    const reordered = reorderTabs(maximized, 'menu:menu-ops-audit', 'menu:menu-ops-invoices', 'before');
+
+    expect(reordered.tabs.map((tab) => tab.id)).toEqual([
+      'menu:menu-ops-orders',
+      'menu:menu-ops-audit',
+      'menu:menu-ops-invoices'
+    ]);
+    expect(reordered.activeTabId).toBe('menu:menu-ops-orders');
+    expect(reordered.maximized).toBe(true);
+    expect(reordered.tabs.find((tab) => tab.id === 'menu:menu-ops-audit')).toMatchObject({
+      openMode: 'iframe',
+      confirmOnClose: true
+    });
+  });
+
+  it('reorders business tabs after a target without moving the fixed home tab', () => {
+    const state = openThreeTabs();
+
+    const reordered = reorderTabs(state, 'menu:menu-ops-orders', 'menu:menu-ops-audit', 'after');
+
+    expect(reordered.tabs.map((tab) => tab.id)).toEqual([
+      'menu:menu-ops-invoices',
+      'menu:menu-ops-audit',
+      'menu:menu-ops-orders'
+    ]);
+    expect(reordered.activeTabId).toBe(state.activeTabId);
+    expect(createHomeTabId(reordered.activeDomainKey)).toBe('home:operations');
+  });
+
+  it('keeps invalid reorder requests as no-ops', () => {
+    const state = openThreeTabs();
+
+    expect(reorderTabs(state, 'menu:missing', 'menu:menu-ops-orders', 'before')).toBe(state);
+    expect(reorderTabs(state, 'menu:menu-ops-orders', 'menu:missing', 'after')).toBe(state);
+    expect(reorderTabs(state, 'menu:menu-ops-orders', 'menu:menu-ops-orders', 'before')).toBe(state);
+    expect(reorderTabs(state, 'menu:menu-ops-orders', 'menu:menu-ops-invoices', 'before')).toBe(state);
+  });
+
   it('enters immersive mode for a target business tab', () => {
     const state = openMenuTab(createInitialWorkspace([domain]), domain, menu).state;
 
@@ -154,3 +197,20 @@ const domain: NavigationDomain = {
   coverColor: '#0f766e',
   menus: [menu]
 };
+
+function openThreeTabs() {
+  const first = openMenuTab(createInitialWorkspace([domain]), domain, menu).state;
+  const second = openMenuTab(first, domain, {
+    ...menu,
+    id: 'menu-ops-invoices',
+    key: 'ops-invoices',
+    title: '发票中心'
+  }).state;
+  return openMenuTab(second, domain, {
+    ...menu,
+    id: 'menu-ops-audit',
+    key: 'ops-audit',
+    title: '审计工作台',
+    confirmOnClose: true
+  }).state;
+}
