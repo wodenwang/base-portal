@@ -13,6 +13,7 @@
 - v0.2.0 run ledger：`.my-harness/runs/2026-06-19-v0.2.0.md`
 - v0.2.0 release notes：`docs/release-v0.2.0.md`
 - v0.2.0 local verification：`docs/verification/2026-06-19-v0.2.0-local-verification.md`
+- v0.2.0 production deploy verification：`docs/verification/2026-06-19-v0.2.0-production-deploy.md`
 - v0.2.0 review：`docs/reviews/2026-06-19-v0.2.0-pre-landing-review.md`
 - 本轮运行记录：`.my-harness/runs/2026-06-19-v0.1.2.md`
 - 实施计划：`IMPLEMENTATION_PLAN.md`

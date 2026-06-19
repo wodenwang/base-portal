@@ -4,13 +4,13 @@
 
 版本：`v0.2.0`
 
-状态：`V0.2.0_STEP13_SHIP_IN_PROGRESS`
+状态：`V0.2.0_RELEASED_AND_DEPLOYED_WITH_OAUTH_USER_ACCEPTANCE_PENDING`
 
 ## v0.2.0 当前判断
 
 推荐方向：真实 Feishu IAM 接入验收 + 第三方应用接入运营化。
 
-当前下一步：Step 13/14 ship。Step 12 review 已完成，正在进入 Git/release closeout 和部署闭环。
+当前下一步：需要人工使用真实飞书用户登录完成 OAuth `code -> userinfo -> me/permissions` 最终验收。v0.2.0 已发布、部署，生产 IAM developer API sync apply 已完成。
 
 关键证据：
 
@@ -30,6 +30,7 @@
 - v0.2.0 发布说明：`docs/release-v0.2.0.md`
 - 本地验证：`docs/verification/2026-06-19-v0.2.0-local-verification.md`
 - Step 12 review：`docs/reviews/2026-06-19-v0.2.0-pre-landing-review.md`
+- 生产部署验证：`docs/verification/2026-06-19-v0.2.0-production-deploy.md`
 
 v0.2.0 Discovery 记录：`.my-harness/runs/2026-06-19-v0.2.0-discovery.md`
 
@@ -49,9 +50,9 @@ v0.2.0 Discovery 记录：`.my-harness/runs/2026-06-19-v0.2.0-discovery.md`
 | 10 | Visual QA | skipped | v0.2.0 未新增主要 UI，Step 3 已判定沿用 Light Command Workspace |
 | 11 | Functional QA | complete | 本地 mock-admin 覆盖导入 dry-run/apply、sync dry-run、导航可见性、审计读回 |
 | 12 | Review | complete | `docs/reviews/2026-06-19-v0.2.0-pre-landing-review.md`，2 个边界问题已 auto-fixed 并复验 |
-| 13 | Git closeout | current | 整理 release boundary |
-| 14 | Ship | pending | 创建 tag/release 并 push |
-| 15 | Land and deploy | pending | 部署并线上健康/真实链路验证 |
+| 13 | Git closeout | complete | `main` pushed，commit `f5491e32f10e46595faf5a39f64c32b421627f39` |
+| 14 | Ship | complete | GitHub Release `v0.2.0` created and retagged after release asset sync fix |
+| 15 | Land and deploy | partial | 生产 `/version=0.2.0`、IAM developer API apply、权限过滤完成；真实用户 OAuth 最终验收待人工登录 |
 
 ---
 

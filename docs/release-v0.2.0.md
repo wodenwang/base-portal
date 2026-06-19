@@ -48,3 +48,4 @@ git diff --check
 - 本地 targeted API 测试：`pnpm --filter @base-portal/api test -- ops.service.spec.ts auth.service.spec.ts navigation.service.spec.ts`
 - 本地 API typecheck：`pnpm --filter @base-portal/api typecheck`
 - 本地完整验证：`docs/verification/2026-06-19-v0.2.0-local-verification.md`
+- 生产部署验证：`docs/verification/2026-06-19-v0.2.0-production-deploy.md`
