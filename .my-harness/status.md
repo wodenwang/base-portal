@@ -35,6 +35,13 @@
 - 脚本退出码：`2`。
 - 结论：仍停在 env gate，未启动 Docker Compose，未写入 `.deploy/version`。
 
+2026-06-19 18:28 CST Step 15 再次重试：
+
+- `./install.sh --image base-portal-release:v0.1.0` 已执行。
+- 脚本退出码：`2`。
+- env 文件元数据：`/home/bpmt/base-portal/deploy/.env`，权限 `600`，大小 `695 bytes`，mtime `2026-06-19 12:54:38 +0800`。
+- 结论：仍停在 env gate，未启动 Docker Compose，未写入 `.deploy/version`。
+
 Secret 边界：
 
 - 不读取、不回显真实 `deploy/.env`。

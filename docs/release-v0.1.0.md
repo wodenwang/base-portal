@@ -97,6 +97,8 @@ git diff --check
 
 结果仍停在 env gate，生产 Compose 未启动，`.deploy/version` 仍为 `missing`，线上 `/health` 和 `/ready` 仍返回 `502`。
 
+2026-06-19 18:28 CST 再次重跑同一命令，结果仍停在 env gate。远端目标文件 `/home/bpmt/base-portal/deploy/.env` 当前元数据显示 mtime 为 `2026-06-19 12:54:38 +0800`，关键项仍为空或占位，生产 Compose 未启动。
+
 ## Secret 边界
 
 未读取、未回显、未提交真实 `deploy/.env`、IAM secret、developer API token、阿里云凭证或证书私钥。
