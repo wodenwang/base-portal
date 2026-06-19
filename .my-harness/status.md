@@ -4,13 +4,13 @@
 
 版本：`v0.2.0`
 
-状态：`V0.2.0_RELEASED_AND_DEPLOYED_WITH_OAUTH_USER_ACCEPTANCE_PENDING`
+状态：`V0.2.0_RELEASED_DEPLOYED_AND_ACCEPTED`
 
 ## v0.2.0 当前判断
 
 推荐方向：真实 Feishu IAM 接入验收 + 第三方应用接入运营化。
 
-当前下一步：需要人工使用真实飞书用户登录完成 OAuth `code -> userinfo -> me/permissions` 最终验收。v0.2.0 已发布、部署，生产 IAM developer API sync apply 已完成。
+当前下一步：无。v0.2.0 已发布、部署，并完成真实 Feishu IAM 登录、用户信息读取、权限读取、无权限状态、权限过滤、审计和生产读回验收。
 
 关键证据：
 
@@ -31,6 +31,11 @@
 - 本地验证：`docs/verification/2026-06-19-v0.2.0-local-verification.md`
 - Step 12 review：`docs/reviews/2026-06-19-v0.2.0-pre-landing-review.md`
 - 生产部署验证：`docs/verification/2026-06-19-v0.2.0-production-deploy.md`
+- OAuth 根路径回调修复：`apps/api/src/main.ts` 关闭静态中间件默认 `index`，并由 `apps/api/test/main.static.spec.ts` 覆盖 `/?code&state` 进入 Nest controller 的回归场景。
+- 当前生产读回：`/version.version=0.2.0`，`/version.commit`、`origin/main` 和 `v0.2.0` tag 一致；远端镜像 `base-portal-release:v0.2.0` 为 `linux/amd64`。
+- 真实 Feishu IAM 用户路径已完成：浏览器回到 `https://base-portal.riversoft.com.cn/`，`/api/session` 200 且 `authenticated=true`，`/api/navigation` 200。
+- 当前真实用户权限点数量为 `0`，生产导航域数量为 `0`，覆盖真实无权限状态；权限过滤 full/partial/no-permission 已通过生产容器内脱敏验证。
+- 生产审计最新 `login_success` 为 `mode=iam`；代码路径证明该事件只会在 `code -> token -> userinfo -> me/permissions` 全部成功后写入。
 
 v0.2.0 Discovery 记录：`.my-harness/runs/2026-06-19-v0.2.0-discovery.md`
 
@@ -45,14 +50,14 @@ v0.2.0 Discovery 记录：`.my-harness/runs/2026-06-19-v0.2.0-discovery.md`
 | 5 | Eng review | complete | `docs/superpowers/specs/2026-06-19-v0.2.0-engineering-review.md` |
 | 6 | Writing plan | complete | `IMPLEMENTATION_PLAN.md`、`docs/superpowers/plans/2026-06-19-v0.2.0-iam-app-package.md` |
 | 7 | Executing plan | complete | 已实现接入包导入、IAM sync、权限过滤测试、版本默认值和 release docs |
-| 8 | Verification before completion | complete | `pnpm check`、`pnpm build`、Compose config、shell syntax、diff check 通过 |
+| 8 | Verification before completion | complete | `pnpm check`、`pnpm build`、Compose config、shell syntax、diff check 通过；新增 `main.static.spec.ts` 防止 OAuth 根路径回调被 SPA 静态页截获 |
 | 9 | Browser verification | complete | Playwright desktop/mobile/demo-domain 截图，console error 0 |
 | 10 | Visual QA | skipped | v0.2.0 未新增主要 UI，Step 3 已判定沿用 Light Command Workspace |
 | 11 | Functional QA | complete | 本地 mock-admin 覆盖导入 dry-run/apply、sync dry-run、导航可见性、审计读回 |
 | 12 | Review | complete | `docs/reviews/2026-06-19-v0.2.0-pre-landing-review.md`，2 个边界问题已 auto-fixed 并复验 |
 | 13 | Git closeout | complete | `main` pushed；最终 commit 以 `v0.2.0` tag、`origin/main` 和生产 `/version.commit` 一致读回为准 |
 | 14 | Ship | complete | GitHub Release `v0.2.0` created and retagged after release asset sync fix |
-| 15 | Land and deploy | partial | 生产 `/version=0.2.0`、IAM developer API apply、权限过滤完成；真实用户 OAuth 最终验收待人工登录 |
+| 15 | Land and deploy | complete | 生产 `/version=0.2.0`、`/version.commit` 与 `v0.2.0` tag 和 `origin/main` 一致；IAM developer API apply、权限过滤、真实用户 OAuth 登录、userinfo、me/permissions 和审计均完成 |
 
 ---
 
