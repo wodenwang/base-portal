@@ -59,3 +59,33 @@
 ## Secret 边界
 
 不得在聊天、日志、截图、Git 或 release notes 中输出真实 `deploy/.env`、IAM secret、developer API token、数据库密码或证书私钥。
+
+---
+
+## 2026-06-19 18:16 CST Step 15 重试记录
+
+执行命令：
+
+```bash
+./install.sh --image base-portal-release:v0.1.0
+```
+
+结果：未启动生产 Compose，脚本按设计停在 env gate，退出码为 `2`。
+
+脚本输出只包含问题 key，不包含 secret 值：
+
+- `empty:FEISHU_IAM_CLIENT_SECRET`
+- `empty:FEISHU_IAM_DEVELOPER_API_TOKEN`
+- `placeholder:POSTGRES_PASSWORD`
+- `placeholder:DATABASE_URL`
+
+重试后的远端读回：
+
+- `base-portal.riversoft.com.cn A 120.24.236.92`：公共 DNS 正确。
+- 远端镜像 `base-portal-release:v0.1.0`：已存在。
+- `.deploy/version`：`missing`。
+- Docker Compose 服务：未创建。
+- `https://base-portal.riversoft.com.cn/health`：`502`。
+- `https://base-portal.riversoft.com.cn/ready`：`502`。
+
+结论：用户声明已补齐生产值，但服务器 `/home/bpmt/base-portal/deploy/.env` 当前读回仍显示关键项为空或占位。需要在该文件中重新保存真实生产值后，再重跑同一条安装命令。

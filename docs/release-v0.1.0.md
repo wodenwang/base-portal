@@ -89,6 +89,14 @@ git diff --check
 - `FEISHU_IAM_CLIENT_SECRET=empty`
 - `FEISHU_IAM_DEVELOPER_API_TOKEN=empty`
 
+2026-06-19 18:16 CST 已重跑：
+
+```bash
+./install.sh --image base-portal-release:v0.1.0
+```
+
+结果仍停在 env gate，生产 Compose 未启动，`.deploy/version` 仍为 `missing`，线上 `/health` 和 `/ready` 仍返回 `502`。
+
 ## Secret 边界
 
 未读取、未回显、未提交真实 `deploy/.env`、IAM secret、developer API token、阿里云凭证或证书私钥。
