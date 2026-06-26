@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-VERSION="v0.3.0"
+VERSION="v0.3.1"
 HOST="bpmt@120.24.236.92"
 REMOTE_DIR="/home/bpmt/base-portal"
 DOMAIN="base-portal.riversoft.com.cn"
@@ -16,7 +16,7 @@ usage() {
 Usage: ./install.sh [options]
 
 Options:
-  --version VERSION       Target version. Default: v0.3.0
+  --version VERSION       Target version. Default: v0.3.1
   --host USER@HOST        SSH target. Default: bpmt@120.24.236.92
   --remote-dir PATH       Remote install dir. Default: /home/bpmt/base-portal
   --image IMAGE:TAG       Immutable production image tag. Required for production.

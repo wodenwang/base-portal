@@ -2,9 +2,47 @@
 
 项目：`base-portal`
 
-版本：`v0.3.0`
+版本：`v0.3.1`
 
-状态：`V0.3.0_COMPLETE`
+状态：`V0.3.1_DEPLOYED`
+
+## v0.3.1 当前判断
+
+推荐方向：部署治理和权限 UI 范围收口补丁版。
+
+当前下一步：无。v0.3.1 已完成本地验证、GitHub release、生产部署和读回。
+
+关键证据：
+
+- 用户已确认本版本权限相关 UI 全部不做。
+- 范围决策：`design/2026-06-27-v0.3.1-scope-decision.md`
+- 实施计划：`docs/superpowers/plans/2026-06-27-v0.3.1-permission-ui-scope-closeout.md`
+- Release notes：`docs/release-v0.3.1.md`
+- 本地验证：`docs/verification/2026-06-27-v0.3.1-local-verification.md`
+- 生产部署：`docs/verification/2026-06-27-v0.3.1-production-deploy.md`
+- 版本默认值已更新到 `0.3.1` / `v0.3.1`。
+- `deploy/docker-compose.yml` 的 `BASE_PORTAL_VERSION` / `APP_VERSION` fallback 已从旧版本修正为 `v0.3.1` / `0.3.1`。
+- 生产 `.deploy/version` 读回 `v0.3.1`，`/health`、`/ready`、`/version` 通过。
+
+## v0.3.1 15-Step Ledger
+
+| Step | Gate | Status | Evidence |
+|---:|---|---|---|
+| 1 | Discovery / Brainstorm | complete | 用户从权限矩阵规划中明确改为本版本下架权限矩阵，并确认权限相关 UI 全部不做 |
+| 2 | Product/design planning review | skipped | 本版本不新增 UI；`design/2026-06-27-v0.3.1-scope-decision.md` 明确不需要 Product Design 视觉稿 |
+| 3 | Design artifact / visual target | complete | `design/2026-06-27-v0.3.1-scope-decision.md` 记录无新增视觉目标和后续恢复权限矩阵的入口条件 |
+| 4 | Product design review | skipped | 无新增视觉制品；沿用 `DESIGN.md` 与 v0.3.0 `Light Command Workspace` |
+| 5 | Eng review | skipped | 小版本仅改版本默认值、部署治理和文档范围；不改架构、数据流、权限 API 或 schema |
+| 6 | Writing plan | complete | `docs/superpowers/plans/2026-06-27-v0.3.1-permission-ui-scope-closeout.md` |
+| 7 | Executing plan | complete | 版本默认值、README、DEPLOY、release notes 和 `.my-harness/` 已更新 |
+| 8 | Verification before completion | complete | `docs/verification/2026-06-27-v0.3.1-local-verification.md`；`pnpm check`、`pnpm build`、Compose config、脚本语法和 `git diff --check` 通过 |
+| 9 | Browser verification | complete | 生产 `GET /` 返回 `200 text/html`，`/api/auth/login` 返回 `302` 到 Feishu IAM OAuth authorize；本版本无新增前端交互 |
+| 10 | Visual QA | skipped | 不新增 UI；仅需确认线上页面未破坏 |
+| 11 | Functional QA | complete | 生产 `.deploy/version=v0.3.1`，`/health`、`/ready`、`/version` 通过；登录入口 302 到 Feishu IAM |
+| 12 | Review | complete | diff 边界限定为 v0.3.1 版本/部署默认值、Docker context 修复、范围文档和验证记录；secret 扫描未发现新增真实 secret |
+| 13 | Git closeout | complete | release commit 包含 `.dockerignore`、版本 bump、部署默认值修正、release notes、本地验证和生产部署记录 |
+| 14 | Ship | complete | GitHub Release `v0.3.1` |
+| 15 | Land and deploy | complete | 已部署到 `bpmt@120.24.236.92:/home/bpmt/base-portal`，生产读回见 `docs/verification/2026-06-27-v0.3.1-production-deploy.md` |
 
 ## v0.3.0 当前判断
 

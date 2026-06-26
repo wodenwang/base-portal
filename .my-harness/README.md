@@ -1,10 +1,14 @@
 # Base Portal my-harness Index
 
-当前迭代：`v0.3.0`
+当前迭代：`v0.3.1`
 
 主入口：
 
 - 当前状态：`.my-harness/status.md`
+- v0.3.1 范围决策：`design/2026-06-27-v0.3.1-scope-decision.md`
+- v0.3.1 implementation plan：`docs/superpowers/plans/2026-06-27-v0.3.1-permission-ui-scope-closeout.md`
+- v0.3.1 release notes：`docs/release-v0.3.1.md`
+- v0.3.1 run ledger：`.my-harness/runs/2026-06-27-v0.3.1.md`
 - v0.3.0 设计制品判断：`design/2026-06-20-v0.3.0-design-decision.md`
 - v0.3.0 Product Design review：`design/2026-06-20-v0.3.0-product-design-review.md`
 - v0.3.0 engineering review：`docs/superpowers/specs/2026-06-20-v0.3.0-engineering-review.md`

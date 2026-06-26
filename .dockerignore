@@ -1,0 +1,12 @@
+.git
+.gstack
+node_modules
+apps/*/node_modules
+apps/*/dist
+deploy/data
+deploy/.env
+.env
+.env.*
+output
+outputs
+*.log

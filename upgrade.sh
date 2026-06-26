@@ -2,7 +2,7 @@
 set -euo pipefail
 
 FROM_VERSION=""
-TO_VERSION="v0.3.0"
+TO_VERSION="v0.3.1"
 HOST="bpmt@120.24.236.92"
 REMOTE_DIR="/home/bpmt/base-portal"
 IMAGE="${BASE_PORTAL_IMAGE:-}"
@@ -15,7 +15,7 @@ Usage: ./upgrade.sh [options]
 
 Options:
   --from VERSION        Expected currently installed version.
-  --to VERSION          Target version. Default: v0.3.0
+  --to VERSION          Target version. Default: v0.3.1
   --host USER@HOST      SSH target. Default: bpmt@120.24.236.92
   --remote-dir PATH     Remote install dir. Default: /home/bpmt/base-portal
   --image IMAGE:TAG     Immutable target image tag. Required for production.
